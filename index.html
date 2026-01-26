@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitges a la Butxaca</title>
+    <style>
+        /* CSS per a que sembli una App de mòbil */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .image-placeholder {
+            background: #0077cc;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .content {
+            padding: 20px;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin: 0 0 10px 0;
+            color: #1c1e21;
+        }
+        .distancia {
+            color: #0077cc;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: block;
+        }
+        p {
+            color: #4b4f56;
+            line-height: 1.5;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-primary { background-color: #0077cc; color: white; }
+        .btn-secondary { background-color: #e4e6eb; color: #1c1e21; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="image-placeholder">
+        📸 Imatge del Monument
+    </div>
+    <div class="content">
+        <span class="distancia">📍 Ets a 25 metres</span>
+        <h1>Palau de Maricel</h1>
+        <p>Aquest palau és un somni fet realitat. Es va construir fa uns 100 anys sobre unes antigues cases de pescadors. No et perdis el 'Racó de la Calma' que hi ha a la vora; és un dels llocs més romàntics de Catalunya.</p>
+        
+        <a href="#" class="btn btn-primary">🗺️ Com arribar-hi</a>
+        <a href="#" class="btn btn-secondary">⏭️ Següent punt</a>
+    </div>
+</div>
+
+</body>
+</html>
