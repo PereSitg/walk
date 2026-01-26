@@ -30,9 +30,12 @@
         #setup { background: white; }
         .permis-box {
             background: #f8f9fa; padding: 15px; border-radius: 15px;
-            margin: 10px 0; width: 100%; max-width: 300px;
+            margin: 10px 0; width: 100%; max-width: 320px;
             display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; transition: background 0.3s;
+            border: 1px solid #eee;
         }
+        .permis-box:active { background: #e9ecef; }
         .status { font-size: 0.8rem; font-weight: bold; }
         .pendent { color: #f0ad4e; }
         .concedit { color: var(--exit); }
@@ -74,42 +77,42 @@
 <body>
 
     <div id="setup" class="screen active">
-        <h1 style="color: var(--blau-sitges); margin-bottom: 5px;">SitgesWalk</h1>
-        <p style="margin-bottom: 30px; color: #666;">Configuració de l'experiència</p>
+        <h1 id="txt-titol">SitgesWalk</h1>
+        <p id="txt-subtitol">Configuració de l'experiència</p>
         
-        <div class="permis-box">
-            <span>🌍 Localització GPS</span>
-            <span id="st-gps" class="status pendent">PENDENT</span>
+        <div class="permis-box" onclick="demanarPermis('gps')">
+            <span id="label-gps">🌍 Localització GPS</span>
+            <span id="st-gps" class="status pendent">---</span>
         </div>
-        <div class="permis-box">
-            <span>🎙️ Micròfon (Guia)</span>
-            <span id="st-micro" class="status pendent">PENDENT</span>
+        <div class="permis-box" onclick="demanarPermis('micro')">
+            <span id="label-micro">🎙️ Micròfon (Guia)</span>
+            <span id="st-micro" class="status pendent">---</span>
         </div>
-        <div class="permis-box">
-            <span>🖼️ Galeria de fotos</span>
-            <span id="st-galeria" class="status pendent">PENDENT</span>
+        <div class="permis-box" onclick="demanarPermis('galeria')">
+            <span id="label-galeria">🖼️ Galeria de fotos</span>
+            <span id="st-galeria" class="status pendent">---</span>
         </div>
 
-        <button class="btn-principal" onclick="demanarTotsElsPermisos()">ACTIVAR APP</button>
+        <button class="btn-principal" id="btn-activar" onclick="demanarTotsElsPermisos()">ACTIVAR APP</button>
     </div>
 
     <div id="menu" class="screen">
-        <h2>Hola! Estàs a Sitges?</h2>
-        <button class="btn-principal" onclick="alert('Buscant el monument més proper...')">📍 QUIN MONUMENT ÉS?</button>
-        <button class="btn-principal" style="background:white; color:var(--blau-sitges);">🗺️ RUTES TURÍSTIQUES</button>
+        <h2 id="txt-salutacio">Hola! Estàs a Sitges?</h2>
+        <button class="btn-principal" id="btn-proper" onclick="alert('Buscant...')">📍 QUIN MONUMENT ÉS?</button>
+        <button class="btn-principal" id="btn-rutes" style="background:white; color:var(--blau-sitges);">🗺️ RUTES TURÍSTIQUES</button>
     </div>
 
     <div id="chat-window">
         <div style="background:var(--blau-sitges); color:white; padding:15px; font-weight:bold; display:flex; justify-content:space-between;">
-            <span>Guia SitgesWalk</span>
+            <span id="chat-header-title">Guia SitgesWalk</span>
             <span onclick="toggleChat()" style="cursor:pointer">✕</span>
         </div>
         <div id="chat-messages">
-            <div class="msg bot">Hola! Soc el teu guia personal. Em pots parlar o escriure.</div>
+            <div class="msg bot" id="chat-welcome-msg">Hola! Soc el teu guia personal.</div>
         </div>
         <div class="chat-controls">
             <button class="icon-btn" onclick="activarVeu()">🎙️</button>
-            <input type="text" id="chat-input" placeholder="Escriu aquí...">
+            <input type="text" id="chat-input" placeholder="...">
             <button class="icon-btn" onclick="enviarMissatge()">🚀</button>
         </div>
     </div>
@@ -117,87 +120,121 @@
     <div id="chat-trigger" onclick="toggleChat()">💬</div>
 
     <script>
-        // --- GESTIÓ DE PERMISOS PROFESSIONALS ---
-        async function demanarTotsElsPermisos() {
+        // --- DICCIONARI MULTI-IDIOMA ---
+        const i18n = {
+            ca: { titol: "SitgesWalk", subt: "Configuració", gps: "🌍 Localització GPS", micro: "🎙️ Micròfon", galeria: "🖼️ Galeria", btnAct: "ACTIVAR APP", salut: "Hola! Estàs a Sitges?", btnProp: "📍 QUIN MONUMENT ÉS?", btnRut: "🗺️ RUTES", pend: "PENDENT", ok: "CONCEDIT", welcome: "Benvingut! Estic llesta per guiar-te.", chatInit: "Hola! Puc ajudar-te amb la veu o text.", placeholder: "Escriu aquí...", errorPermis: "Cal acceptar els permisos per continuar." },
+            es: { titol: "SitgesWalk", subt: "Configuración", gps: "🌍 Localización GPS", micro: "🎙️ Micrófono", galeria: "🖼️ Galería", btnAct: "ACTIVAR APP", salut: "¿Hola! Estás en Sitges?", btnProp: "📍 ¿QUÉ MONUMENTO ES?", btnRut: "🗺️ RUTAS", pend: "PENDIENTE", ok: "CONCEDIDO", welcome: "¡Bienvenido! Estoy lista para guiarte.", chatInit: "Hola! Puedo ayudarte con voz o texto.", placeholder: "Escribe aquí...", errorPermis: "Debes aceptar los permisos para continuar." },
+            en: { titol: "SitgesWalk", subt: "Setup", gps: "🌍 GPS Location", micro: "🎙️ Microphone", galeria: "🖼️ Gallery", btnAct: "ACTIVATE APP", salut: "Hi! Are you in Sitges?", btnProp: "📍 WHICH MONUMENT?", btnRut: "🗺️ ROUTES", pend: "PENDING", ok: "GRANTED", welcome: "Welcome! I'm ready to guide you.", chatInit: "Hi! I can help you via voice or text.", placeholder: "Type here...", errorPermis: "All permissions must be granted." }
+        };
+
+        let lang = navigator.language.split('-')[0];
+        if (!i18n[lang]) lang = 'en';
+        const t = i18n[lang];
+
+        // Aplicar textos en carregar
+        window.onload = () => {
+            document.getElementById('txt-titol').innerText = t.titol;
+            document.getElementById('txt-subtitol').innerText = t.subt;
+            document.getElementById('label-gps').innerText = t.gps;
+            document.getElementById('label-micro').innerText = t.micro;
+            document.getElementById('label-galeria').innerText = t.galeria;
+            document.getElementById('btn-activar').innerText = t.btnAct;
+            document.getElementById('txt-salutacio').innerText = t.salut;
+            document.getElementById('btn-proper').innerText = t.btnProp;
+            document.getElementById('btn-rutes').innerText = t.btnRut;
+            document.getElementById('chat-welcome-msg').innerText = t.chatInit;
+            document.getElementById('chat-input').placeholder = t.placeholder;
+            document.querySelectorAll('.status').forEach(el => el.innerText = t.pend);
+        };
+
+        // --- GESTIÓ DE PERMISOS ---
+        const permisos = { gps: false, micro: false, galeria: false };
+
+        async function demanarPermis(tipus) {
             try {
-                // 1. GPS
-                const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
-                document.getElementById('st-gps').innerText = "OK";
-                document.getElementById('st-gps').className = "status concedit";
+                if (tipus === 'gps') {
+                    await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
+                    actualitzarStatus('st-gps', true);
+                    permisos.gps = true;
+                } else if (tipus === 'micro') {
+                    await navigator.mediaDevices.getUserMedia({ audio: true });
+                    actualitzarStatus('st-micro', true);
+                    permisos.micro = true;
+                } else if (tipus === 'galeria') {
+                    actualitzarStatus('st-galeria', true);
+                    permisos.galeria = true;
+                }
+                verificarFinalitzacio();
+            } catch (e) { console.log("Permís denegat:", tipus); }
+        }
 
-                // 2. MICRÒFON
-                await navigator.mediaDevices.getUserMedia({ audio: true });
-                document.getElementById('st-micro').innerText = "OK";
-                document.getElementById('st-micro').className = "status concedit";
+        async function demanarTotsElsPermisos() {
+            await demanarPermis('gps');
+            await demanarPermis('micro');
+            await demanarPermis('galeria');
+        }
 
-                // 3. GALERIA (Simulació d'accés a fitxers)
-                document.getElementById('st-galeria').innerText = "OK";
-                document.getElementById('st-galeria').className = "status concedit";
+        function actualitzarStatus(id, estat) {
+            const el = document.getElementById(id);
+            el.innerText = t.ok;
+            el.className = "status concedit";
+        }
 
-                // Tot OK -> Passem al menú
+        function verificarFinalitzacio() {
+            if (permisos.gps && permisos.micro && permisos.galeria) {
                 setTimeout(() => {
                     document.getElementById('setup').classList.remove('active');
                     document.getElementById('menu').classList.add('active');
-                    parlar("Benvingut a Sitges Walk. Estic llesta per guiar-te.");
-                }, 1000);
-
-            } catch (err) {
-                alert("Per a una experiència completa, cal acceptar tots els permisos.");
+                    parlar(t.welcome);
+                }, 800);
             }
         }
 
-        // --- LÒGICA DE VEU (Català) ---
+        // --- VEU I XAT ---
         function parlar(text) {
             const ut = new SpeechSynthesisUtterance(text);
-            ut.lang = 'ca-ES';
+            ut.lang = lang === 'ca' ? 'ca-ES' : (lang === 'es' ? 'es-ES' : 'en-US');
             window.speechSynthesis.speak(ut);
         }
 
         function activarVeu() {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'ca-ES';
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return alert("Navegador no compatible");
+            const recognition = new SpeechRecognition();
+            recognition.lang = lang === 'ca' ? 'ca-ES' : (lang === 'es' ? 'es-ES' : 'en-US');
             recognition.start();
-
-            recognition.onresult = (event) => {
-                const text = event.results[0][0].transcript;
-                document.getElementById('chat-input').value = text;
+            recognition.onresult = (e) => {
+                document.getElementById('chat-input').value = e.results[0][0].transcript;
                 enviarMissatge();
             };
         }
 
-        // --- XATBOT OBERT ---
         function enviarMissatge() {
             const input = document.getElementById('chat-input');
-            const msg = input.value.trim().toLowerCase();
-            if(!msg) return;
-
-            afegirMsg(input.value, 'user');
+            const val = input.value.trim();
+            if (!val) return;
+            afegirMsg(val, 'user');
             input.value = '';
-
-            // Simulació de "pensament"
+            
             setTimeout(() => {
-                let resposta = "Molt interessant! Com a guia de Sitges, encara estic aprenent detalls sobre això. En Pere m'està ensenyant molt!";
-                
-                if(msg.includes("hola")) resposta = "Hola! Vols que anem a veure la Punta o prefereixes un museu?";
-                if(msg.includes("punta") || msg.includes("església")) resposta = "L'església de Sant Bartomeu és del segle XVII. Les vistes des d'allà són brutals!";
-                if(msg.includes("platja")) resposta = "A Sitges tenim 17 platges. La de Sant Sebastià és la meva preferida!";
-
-                afegirMsg(resposta, 'bot');
-                parlar(resposta);
-            }, 800);
+                let r = "Molt bé! Sóc el teu guia.";
+                if (val.toLowerCase().includes("hola")) r = lang === 'ca' ? "Hola! Què vols visitar?" : "¡Hola! ¿Qué quieres visitar?";
+                afegirMsg(r, 'bot');
+                parlar(r);
+            }, 600);
         }
 
-        function afegirMsg(text, tipus) {
-            const div = document.createElement('div');
-            div.className = `msg ${tipus}`;
-            div.innerText = text;
-            document.getElementById('chat-messages').appendChild(div);
+        function afegirMsg(txt, cl) {
+            const d = document.createElement('div');
+            d.className = `msg ${cl}`;
+            d.innerText = txt;
+            document.getElementById('chat-messages').appendChild(d);
             document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
         }
 
         function toggleChat() {
-            const win = document.getElementById('chat-window');
-            win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+            const w = document.getElementById('chat-window');
+            w.style.display = w.style.display === 'flex' ? 'none' : 'flex';
         }
     </script>
 </body>
