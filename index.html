@@ -152,7 +152,7 @@
     <div id="chat-container">
         <div id="chat-window">
             <div id="chat-header"><span>Guia SitgesWalk</span><span onclick="toggleChat()" style="cursor:pointer">✖</span></div>
-            <div id="chat-messages"><div class="msg bot">Hola! Soc el teu guia. Què vols saber sobre Sitges?</div></div>
+            <div id="chat-messages"><div class="msg bot">Hola! Soc el teu guia de Sitges. Pregunta'm el que vulguis!</div></div>
             <div id="chat-input-area">
                 <input type="text" id="chat-input" placeholder="Escriu aquí...">
                 <button onclick="enviarMissatge()" style="border:none; background:none; cursor:pointer">🚀</button>
@@ -184,43 +184,47 @@
 
         setTimeout(() => canviarPantalla('menu'), 3000);
 
-        // LÒGICA DEL XAT
-        window.toggleChat = function() {
-            const win = document.getElementById('chat-window');
-            win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
-        };
-
+        // BOT OBERT: Lògica de respostes
         window.enviarMissatge = function() {
             const input = document.getElementById('chat-input');
-            const msg = input.value.trim().toLowerCase();
-            if (!msg) return;
+            const text = input.value.trim();
+            const msg = text.toLowerCase();
+            if (!text) return;
 
-            afegirMissatge(input.value, 'user');
+            afegirMissatge(text, 'user');
             input.value = '';
 
-            // Respostes automàtiques (Chatbot bàsic)
             setTimeout(() => {
-                let resposta = "Ho sento, no t'he entès. Pregunta'm pel 'maricel', l''església' o el 'temps'.";
-                if (msg.includes("maricel")) resposta = "El conjunt de Maricel és una joia noucentista construïda per Charles Deering.";
-                if (msg.includes("església") || msg.includes("punta")) resposta = "L'església de Sant Bartomeu i Santa Tecla és la silueta més famosa de Sitges.";
-                if (msg.includes("hola")) resposta = "Hola! Estic llista per guiar-te per Sitges.";
-                if (msg.includes("temps")) resposta = "A Sitges solem tenir un microclima fantàstic amb 300 dies de sol al any!";
+                let resposta = "Aquesta idea és molt bona! Encara estic aprenent, però en Pere m'ha dit que aviat sabré respondre a tot sobre Sitges.";
                 
+                // Sistema obert de paraules clau
+                if (msg.includes("hola")) resposta = "Hola! Com va la teva visita per Sitges?";
+                if (msg.includes("menjar") || msg.includes("restaurant")) resposta = "T'agradaria provar el Xató o prefereixes un arròs al Passeig?";
+                if (msg.includes("festa")) resposta = "Sitges és festa tot l'any! El Carnaval i la Festa Major són els millors moments.";
+                if (msg.includes("museu")) resposta = "No et pots perdre el Cau Ferrat i el Maricel, són joies del Modernisme.";
+                if (msg.includes("platja")) resposta = "T'agrada el soroll? Ves a la Ribera. Vols calma? Ves a Aiguadolç.";
+
                 afegirMissatge(resposta, 'bot');
-            }, 1000);
+            }, 800);
         };
 
         function afegirMissatge(text, tipus) {
+            const container = document.getElementById('chat-messages');
             const div = document.createElement('div');
             div.className = `msg ${tipus}`;
             div.innerText = text;
-            document.getElementById('chat-messages').appendChild(div);
-            document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
         }
+
+        window.toggleChat = function() {
+            const win = document.getElementById('chat-window');
+            win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+        };
 
         // GPS I RUTES
         function calcularDistancia(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; 
+            const R = 6371e3;
             const p1 = lat1 * Math.PI / 180;
             const p2 = lat2 * Math.PI / 180;
             const dp = (lat2 - lat1) * Math.PI / 180;
@@ -241,3 +245,24 @@
                     llista.push(d);
                 });
                 llista.sort((a, b) => a.distancia - b.distancia);
+
+                if (tipusRuta === 'proper') {
+                    mostrarMonument(llista[0]);
+                } else {
+                    alert("Opció '" + tipusRuta + "' seleccionada. Properament traçarem aquesta ruta!");
+                }
+            }, () => alert("Si us plau, activa el GPS."));
+        };
+
+        function mostrarMonument(m) {
+            document.getElementById('nom-monument').innerText = m.nom;
+            document.getElementById('desc-monument').innerText = m.descripcio;
+            document.getElementById('foto-monument').innerHTML = m.imatge ? `<img src="${m.imatge}">` : "";
+            document.getElementById('btn-com-arribar').onclick = () => {
+                window.open(`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}`);
+            };
+            canviarPantalla('detall');
+        }
+    </script>
+</body>
+</html>
