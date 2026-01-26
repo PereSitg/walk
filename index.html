@@ -17,23 +17,23 @@
     <div id="setup" class="screen">
         <div class="container">
             <h1 id="txt-config">Configuració</h1>
-            <p id="txt-permisos-desc">Activa els permisos per a una experiència completa:</p>
+            <p id="txt-permisos-desc">Assegura't d'acceptar els avisos del navegador:</p>
             
             <button class="btn btn-all" id="btn-tots" onclick="activarTot()">✅ ACTIVAR TOTS DE COP</button>
 
             <div class="permis-row">
-                <button class="btn-permis" onclick="demanarPermis('gps')">🌍 GPS</button>
-                <button class="btn-permis" onclick="demanarPermis('camera')">📷 Càmera</button>
+                <button class="btn-permis" id="btn-gps" onclick="demanarPermis('gps')">🌍 GPS</button>
+                <button class="btn-permis" id="btn-camera" onclick="demanarPermis('camera')">📷 Càmera</button>
             </div>
             <div class="permis-row">
-                <button class="btn-permis" onclick="demanarPermis('micro')">🎙️ Micro</button>
-                <button class="btn-permis" onclick="demanarPermis('galeria')">🖼️ Galeria</button>
+                <button class="btn-permis" id="btn-micro" onclick="demanarPermis('micro')">🎙️ Micro</button>
+                <button class="btn-permis" id="btn-galeria" onclick="demanarPermis('galeria')">🖼️ Galeria</button>
             </div>
 
             <div id="status-permisos">
-                <p id="st-gps">GPS: <span>PENDENT</span></p>
+                <p id="st-gps">Ubicació: <span>PENDENT</span></p>
                 <p id="st-camera">Càmera: <span>PENDENT</span></p>
-                <p id="st-micro">Micro: <span>PENDENT</span></p>
+                <p id="st-micro">Micròfon: <span>PENDENT</span></p>
                 <p id="st-galeria">Galeria: <span>PENDENT</span></p>
             </div>
 
@@ -46,10 +46,10 @@
             <div class="card">
                 <div class="info">
                     <h1 id="txt-ruta-titol">Quina ruta vols fer?</h1>
-                    <button class="btn btn-next" id="btn-30m" onclick="comencarApp('30min')">⏱️ Ruta ràpida (30 min)</button>
-                    <button class="btn btn-next" id="btn-1h" onclick="comencarApp('1h')">🚶 Ruta estàndard (1h)</button>
-                    <button class="btn btn-next" id="btn-2h" onclick="comencarApp('2h')">🗺️ Ruta extensa (2h)</button>
-                    <button class="btn btn-main" id="btn-completa" onclick="comencarApp('completa')">⭐ Ruta Completa</button>
+                    <button class="btn btn-next" onclick="comencarApp('30min')">⏱️ Ruta ràpida (30 min)</button>
+                    <button class="btn btn-next" onclick="comencarApp('1h')">🚶 Ruta estàndard (1h)</button>
+                    <button class="btn btn-next" onclick="comencarApp('2h')">🗺️ Ruta extensa (2h)</button>
+                    <button class="btn btn-main" onclick="comencarApp('completa')">⭐ Ruta Completa</button>
                 </div>
             </div>
         </div>
@@ -64,7 +64,6 @@
                     <h1 id="mon-nom">Busca un monument</h1>
                     <p id="mon-desc">Fes una foto o usa el GPS per identificar-lo.</p>
                     <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;">
-                    
                     <div id="mon-galeria" class="galeria"></div>
                     <div class="actions">
                         <button class="btn btn-main" id="btn-localitzar">📍 PER GPS</button>
@@ -80,6 +79,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Firebase Config (les teves dades)
         const firebaseConfig = {
             apiKey: "AIzaSyDQwBo1m8hoh1kk2AW7Tex51trJzeDBejU",
             authDomain: "sitgeswalk.firebaseapp.com",
@@ -93,44 +93,59 @@
         const db = getFirestore(app);
         let monumentTrobat = null;
 
-        // --- SISTEMA AUTOMÀTIC D'IDIOMA ---
+        // Detecció d'idioma
         const idiomes = {
-            'ca': { config: 'Configuració', seguent: 'SEGÜENT', ruta: 'Quina ruta vols fer?', escoltar: '🔊 ESCOLTAR HISTÒRIA', langCode: 'ca-ES' },
-            'es': { config: 'Configuración', seguent: 'SIGUIENTE', ruta: '¿Qué ruta quieres hacer?', escoltar: '🔊 ESCUCHAR HISTORIA', langCode: 'es-ES' },
-            'en': { config: 'Settings', seguent: 'NEXT', ruta: 'Which route do you want?', escoltar: '🔊 LISTEN STORY', langCode: 'en-GB' },
-            'fr': { config: 'Configuration', seguent: 'SUIVANT', ruta: 'Quel itinéraire voulez-vous?', escoltar: '🔊 ÉCOUTER L\'HISTOIRE', langCode: 'fr-FR' }
+            'ca': { config: 'Configuració', seguent: 'SEGÜENT', ruta: 'Quina ruta vols fer?', langCode: 'ca-ES' },
+            'es': { config: 'Configuración', seguent: 'SIGUIENTE', ruta: '¿Qué ruta quieres hacer?', langCode: 'es-ES' },
+            'en': { config: 'Settings', seguent: 'NEXT', ruta: 'Which route?', langCode: 'en-GB' },
+            'fr': { config: 'Configuration', seguent: 'SUIVANT', ruta: 'Quel trajet?', langCode: 'fr-FR' }
         };
-
         let lang = navigator.language.split('-')[0];
-        if (!idiomes[lang]) lang = 'en'; // Per defecte anglès si no és un dels 4
+        if (!idiomes[lang]) lang = 'en';
         const textos = idiomes[lang];
 
-        // Aplicar textos automàtics
         document.getElementById('txt-config').innerText = textos.config;
         document.getElementById('btn-seguent').innerText = textos.seguent;
         document.getElementById('txt-ruta-titol').innerText = textos.ruta;
-        document.getElementById('btn-escoltar').innerText = textos.escoltar;
 
         setTimeout(() => {
             document.getElementById('splash').classList.remove('active');
             document.getElementById('setup').classList.add('active');
         }, 4000);
 
+        // --- GESTIÓ DE PERMISOS REAL ---
         window.demanarPermis = async (tipus) => {
-            const updateStatus = (id) => {
-                const el = document.querySelector(`#${id} span`);
-                el.innerText = "OK";
-                el.style.color = "#28a745";
-            };
-            if (tipus === 'gps') navigator.geolocation.getCurrentPosition(() => updateStatus('st-gps'));
-            else if (tipus === 'camera') { try { await navigator.mediaDevices.getUserMedia({ video: true }); updateStatus('st-camera'); } catch(e){} }
-            else if (tipus === 'micro') { try { await navigator.mediaDevices.getUserMedia({ audio: true }); updateStatus('st-micro'); } catch(e){} }
-            else if (tipus === 'galeria') updateStatus('st-galeria');
+            const elStatus = document.querySelector(`#st-${tipus} span`);
+            
+            try {
+                if (tipus === 'gps') {
+                    navigator.geolocation.getCurrentPosition(
+                        () => { elStatus.innerText = "CONCEDIT"; elStatus.style.color = "#28a745"; },
+                        () => { elStatus.innerText = "DENEGAT"; elStatus.style.color = "#dc3545"; },
+                        { enableHighAccuracy: true, timeout: 5000 }
+                    );
+                } else if (tipus === 'camera') {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    stream.getTracks().forEach(t => t.stop());
+                    elStatus.innerText = "CONCEDIT"; elStatus.style.color = "#28a745";
+                } else if (tipus === 'micro') {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    stream.getTracks().forEach(t => t.stop());
+                    elStatus.innerText = "CONCEDIT"; elStatus.style.color = "#28a745";
+                } else if (tipus === 'galeria') {
+                    elStatus.innerText = "CONCEDIT"; elStatus.style.color = "#28a745";
+                }
+            } catch (err) {
+                elStatus.innerText = "ERROR"; elStatus.style.color = "#dc3545";
+                console.error("Error de permís:", tipus, err);
+            }
         };
 
         window.activarTot = async () => {
-            await demanarPermis('gps'); await demanarPermis('camera');
-            await demanarPermis('micro'); await demanarPermis('galeria');
+            await demanarPermis('gps');
+            await demanarPermis('camera');
+            await demanarPermis('micro');
+            await demanarPermis('galeria');
         };
 
         window.anarARuta = () => {
@@ -143,23 +158,8 @@
             document.getElementById('main').classList.add('active');
         };
 
-        // --- LÒGICA DE CÀMERA ---
-        const btnCamera = document.getElementById('btn-camera-trigger');
-        const cameraInput = document.getElementById('camera-input');
-
-        btnCamera.onclick = () => cameraInput.click();
-
-        cameraInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                // Aquí aniria la lògica de reconeixement d'imatge
-                document.getElementById('mon-nom').innerText = "Analitzant foto...";
-                setTimeout(() => {
-                    document.getElementById('mon-nom').innerText = "Foto rebuda!";
-                }, 2000);
-            }
-        };
-
+        // Càmera i escoltar
+        document.getElementById('btn-camera-trigger').onclick = () => document.getElementById('camera-input').click();
         document.getElementById('btn-escoltar').onclick = () => {
             if (monumentTrobat) {
                 window.speechSynthesis.cancel();
