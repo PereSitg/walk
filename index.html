@@ -2,126 +2,48 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SitgesWalk Pro - Pere Badia i Lorenz</title>
-    <style>
-        :root { 
-            --blau-sitges: #0077cc; 
-            --blau-mar: #005fa3;
-            --blanc: #ffffff; 
-            --gris: #f1f3f5; 
-            --exit: #28a745; 
-            --text-fosc: #333333;
-        }
-        
-        body, html { 
-            margin: 0; padding: 0; height: 100%; 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background-color: var(--gris); overflow: hidden; 
-        }
-
-        .screen { 
-            display: none; height: 100vh; width: 100%; 
-            flex-direction: column; align-items: center; justify-content: center; 
-            padding: 25px; box-sizing: border-box; text-align: center; 
-            position: absolute; top: 0; left: 0;
-        }
-        
-        .active { display: flex; }
-
-        /* PANTALLA PRESENTACIÓ (Splash) */
-        #splash {
-            background: var(--blau-sitges);
-            color: white;
-            z-index: 10000;
-        }
-        #splash h1 { font-size: 3rem; margin: 0; }
-        #splash p { font-size: 1.2rem; opacity: 0.9; margin-top: 10px; }
-
-        /* PANTALLA SETUP */
-        #setup { background: white; }
-        .permis-box { 
-            background: #f8f9fa; padding: 15px; border-radius: 15px; 
-            margin: 10px 0; width: 100%; max-width: 320px; 
-            display: flex; align-items: center; justify-content: space-between; 
-            cursor: pointer; border: 1px solid #eee; 
-        }
-        .status { font-size: 0.8rem; font-weight: bold; }
-        .concedit { color: var(--exit); }
-
-        /* DISSENY CARD (Monument) */
-        .container { max-width: 500px; width: 100%; margin: 0 auto; }
-        .card { 
-            background: var(--blanc); border-radius: 20px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08); overflow: hidden; 
-            text-align: left;
-        }
-        .image-header { 
-            width: 100%; height: 180px; 
-            background: linear-gradient(135deg, var(--blau-sitges), var(--blau-mar)); 
-            display: flex; align-items: center; justify-content: center; 
-            color: white; font-size: 1.4rem; font-weight: bold; padding: 20px; box-sizing: border-box;
-        }
-        .info { padding: 25px; }
-        .distancia-tag { 
-            background-color: #e1f5fe; color: var(--blau-sitges); 
-            padding: 5px 12px; border-radius: 50px; font-size: 0.85rem; 
-            font-weight: bold; display: inline-block; margin-bottom: 15px; 
-        }
-        h2 { margin: 0 0 10px 0; font-size: 1.6rem; color: #1a1a1a; }
-        .desc-text { line-height: 1.6; font-size: 1.05rem; color: #555; margin-bottom: 20px; }
-
-        /* BOTONS */
-        .btn-principal { 
-            background: var(--blau-sitges); color: white; border: none; 
-            padding: 16px 30px; border-radius: 12px; font-size: 1.1rem; 
-            font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s;
-        }
-        .btn-principal:active { transform: scale(0.98); background: var(--blau-mar); }
-
-        /* LOADER */
-        .loader {
-            border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid white;
-            border-radius: 50%; width: 30px; height: 30px;
-            animation: spin 1s linear infinite; margin-top: 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="splash" class="screen active">
         <h1>SitgesWalk</h1>
         <p>by Pere Badia i Lorenz</p>
-        <div class="loader"></div>
     </div>
 
     <div id="setup" class="screen">
-        <h1>Configuració</h1>
-        <p>Activa els permisos per a l'experiència</p>
-        <div class="permis-box" onclick="demanarPermis('gps')">
-            <span>🌍 Localització GPS</span>
-            <span id="st-gps" class="status">PENDENT</span>
-        </div>
-        <div class="permis-box" onclick="demanarPermis('micro')">
-            <span>🎙️ Micròfon (Guia)</span>
-            <span id="st-micro" class="status">PENDENT</span>
-        </div>
-        <button class="btn-principal" id="btn-activar" style="margin-top:20px; max-width:320px;">ACTIVAR APP</button>
-    </div>
-
-    <div id="menu" class="screen">
         <div class="container">
             <div class="card">
-                <div class="image-header" id="card-titol">SITGES WALK</div>
                 <div class="info">
-                    <div class="distancia-tag" id="dist-tag">ESTÀS A SITGES?</div>
-                    <h2 id="monument-nom">Explora la vila</h2>
-                    <p class="desc-text" id="monument-desc">Clica el botó per identificar el monument que tens davant.</p>
-                    <button class="btn-principal" id="btn-proper">📍 QUIN MONUMENT ÉS?</button>
+                    <h1>Benvingut</h1>
+                    <p>Per començar la ruta per Sitges, activa el teu GPS.</p>
+                    <button class="btn btn-main" onclick="demanarGPS()">🌍 ACTIVAR GPS</button>
+                    <button class="btn btn-next" id="btn-entrar">ENTRAR</button>
                 </div>
             </div>
-            <p style="margin-top:20px; font-size:0.8rem; color:#888;">SitgesWalk Pro by Pere Badia i Lorenz</p>
+        </div>
+    </div>
+
+    <div id="main" class="screen">
+        <div class="container">
+            <div class="card">
+                <div id="mon-imatge" class="image-header">SITGES WALK</div>
+                <div class="info">
+                    <div class="distancia-tag" id="tag-estat">PREPARAT</div>
+                    <h1 id="mon-nom">Busca un monument</h1>
+                    <p id="mon-desc">Apropa't a un punt d'interès i clica el botó.</p>
+                    
+                    <div id="mon-galeria" class="galeria"></div>
+
+                    <div class="actions">
+                        <button class="btn btn-main" id="btn-localitzar">📍 QUIN MONUMENT ÉS?</button>
+                        <button class="btn btn-next" id="btn-escoltar">🔊 ESCOLTAR HISTÒRIA</button>
+                    </div>
+                </div>
+            </div>
+            <p style="text-align:center; font-size:0.8rem; color:#999; margin-top:15px;">SitgesWalk Pro by Pere Badia i Lorenz</p>
         </div>
     </div>
 
@@ -135,89 +57,73 @@
             projectId: "sitgeswalk",
             storageBucket: "sitgeswalk.firebasestorage.app",
             messagingSenderId: "13367453792",
-            appId: "1:13367453792:web:ee3a8dbae2df721b8f3b05",
-            measurementId: "G-HQQ8SFX99F"
+            appId: "1:13367453792:web:ee3a8dbae2df721b8f3b05"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        let monumentTrobat = null;
 
-        // --- GESTIÓ DE PANTALLES ---
-        
-        // 1. Splash de 4 segons
         setTimeout(() => {
-            const splash = document.getElementById('splash');
-            splash.style.transition = "opacity 0.8s ease";
-            splash.style.opacity = "0";
-            setTimeout(() => {
-                splash.classList.remove('active');
-                document.getElementById('setup').classList.add('active');
-            }, 800);
+            document.getElementById('splash').classList.remove('active');
+            document.getElementById('setup').classList.add('active');
         }, 4000);
 
-        // --- LÒGICA DE L'APP ---
-        async function buscarMonumentProper() {
-            document.getElementById('monument-nom').innerText = "Cercant...";
+        window.demanarGPS = () => {
+            navigator.geolocation.getCurrentPosition(() => {});
+        };
+
+        document.getElementById('btn-entrar').onclick = () => {
+            document.getElementById('setup').classList.remove('active');
+            document.getElementById('main').classList.add('active');
+            parlar("Benvingut a la ruta de Pere Badia i Lorenz.");
+        };
+
+        document.getElementById('btn-localitzar').onclick = async () => {
+            document.getElementById('mon-nom').innerText = "Buscant...";
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                const uLat = pos.coords.latitude;
-                const uLon = pos.coords.longitude;
-                
-                try {
-                    const querySnapshot = await getDocs(collection(db, "monuments"));
-                    let proper = null; let distMin = Infinity;
+                const querySnapshot = await getDocs(collection(db, "monuments"));
+                let proper = null; let dMin = Infinity;
 
-                    querySnapshot.forEach((doc) => {
-                        const d = doc.data();
-                        const dist = Math.sqrt(Math.pow(d.latitud - uLat, 2) + Math.pow(d.longitud - uLon, 2));
-                        if (dist < distMin) { distMin = dist; proper = d; }
-                    });
+                querySnapshot.forEach((doc) => {
+                    const d = doc.data();
+                    const dist = Math.sqrt(Math.pow(d.latitud - pos.coords.latitude, 2) + Math.pow(d.longitud - pos.coords.longitude, 2));
+                    if (dist < dMin) { dMin = dist; proper = d; }
+                });
 
-                    if (proper) {
-                        document.getElementById('monument-nom').innerText = proper.nom;
-                        document.getElementById('monument-desc').innerText = proper.descripcio;
-                        document.getElementById('card-titol').innerText = proper.nom;
-                        document.getElementById('dist-tag').innerText = "MONUMENT PROPER DETECTAT";
-                        parlar(proper.nom + ". " + proper.descripcio);
+                if (proper) {
+                    monumentTrobat = proper;
+                    document.getElementById('mon-nom').innerText = proper.nom;
+                    document.getElementById('mon-desc').innerText = proper.descripcio;
+                    document.getElementById('tag-estat').innerText = "MONUMENT DETECTAT";
+                    
+                    const gal = document.getElementById('mon-galeria');
+                    gal.innerHTML = "";
+                    if (proper.fotos && proper.fotos.length > 0) {
+                        document.getElementById('mon-imatge').style.backgroundImage = `url('${proper.fotos[0]}')`;
+                        document.getElementById('mon-imatge').innerText = "";
+                        proper.fotos.forEach(url => {
+                            const img = document.createElement('img');
+                            img.src = url;
+                            img.onclick = () => document.getElementById('mon-imatge').style.backgroundImage = `url('${url}')`;
+                            gal.appendChild(img);
+                        });
                     }
-                } catch (e) {
-                    document.getElementById('monument-nom').innerText = "Error de connexió";
+                    parlar("Estàs davant de " + proper.nom);
                 }
             });
-        }
+        };
 
-        function parlar(text) {
+        document.getElementById('btn-escoltar').onclick = () => {
+            if (monumentTrobat) parlar(monumentTrobat.descripcio);
+        };
+
+        function parlar(t) {
             window.speechSynthesis.cancel();
-            const ut = new SpeechSynthesisUtterance(text);
-            ut.lang = 'ca-ES';
-            window.speechSynthesis.speak(ut);
+            const u = new SpeechSynthesisUtterance(t);
+            u.lang = 'ca-ES';
+            window.speechSynthesis.speak(u);
         }
-
-        // --- EVENTS ---
-        document.getElementById('btn-proper').onclick = buscarMonumentProper;
-
-        document.getElementById('btn-activar').onclick = () => {
-            document.getElementById('setup').classList.remove('active');
-            document.getElementById('menu').classList.add('active');
-            parlar("Benvingut a Sitges Walk, una aplicació de Pere Badia i Lorenz.");
-        };
-
-        window.demanarPermis = async (tipus) => {
-            if (tipus === 'gps') {
-                navigator.geolocation.getCurrentPosition(() => {
-                    const el = document.getElementById('st-gps');
-                    el.innerText = "CONCEDIT";
-                    el.classList.add('concedit');
-                });
-            }
-            if (tipus === 'micro') {
-                try {
-                    await navigator.mediaDevices.getUserMedia({ audio: true });
-                    const el = document.getElementById('st-micro');
-                    el.innerText = "CONCEDIT";
-                    el.classList.add('concedit');
-                } catch (e) {}
-            }
-        };
     </script>
 </body>
 </html>
