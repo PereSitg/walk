@@ -79,7 +79,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Firebase Config (les teves dades)
         const firebaseConfig = {
             apiKey: "AIzaSyDQwBo1m8hoh1kk2AW7Tex51trJzeDBejU",
             authDomain: "sitgeswalk.firebaseapp.com",
@@ -93,7 +92,6 @@
         const db = getFirestore(app);
         let monumentTrobat = null;
 
-        // Detecció d'idioma
         const idiomes = {
             'ca': { config: 'Configuració', seguent: 'SEGÜENT', ruta: 'Quina ruta vols fer?', langCode: 'ca-ES' },
             'es': { config: 'Configuración', seguent: 'SIGUIENTE', ruta: '¿Qué ruta quieres hacer?', langCode: 'es-ES' },
@@ -113,32 +111,49 @@
             document.getElementById('setup').classList.add('active');
         }, 4000);
 
-        // --- GESTIÓ DE PERMISOS REAL ---
+        // --- SISTEMA DE PERMISOS AMB PROMESES I FEEDBACK ---
         window.demanarPermis = async (tipus) => {
             const elStatus = document.querySelector(`#st-${tipus} span`);
-            
-            try {
+            elStatus.innerText = "BUSCANT...";
+            elStatus.style.color = "#ffa500";
+
+            return new Promise((resolve) => {
                 if (tipus === 'gps') {
                     navigator.geolocation.getCurrentPosition(
-                        () => { elStatus.innerText = "CONCEDIT"; elStatus.style.color = "#28a745"; },
-                        () => { elStatus.innerText = "DENEGAT"; elStatus.style.color = "#dc3545"; },
-                        { enableHighAccuracy: true, timeout: 5000 }
+                        (pos) => {
+                            elStatus.innerText = "CONCEDIT";
+                            elStatus.style.color = "#28a745";
+                            console.log("Posició:", pos.coords.latitude, pos.coords.longitude);
+                            resolve(true);
+                        },
+                        (err) => {
+                            elStatus.innerText = "ERROR";
+                            elStatus.style.color = "#dc3545";
+                            alert("Cal activar el GPS al mòbil i acceptar el permís al navegador.");
+                            resolve(false);
+                        },
+                        { enableHighAccuracy: true, timeout: 8000 }
                     );
-                } else if (tipus === 'camera') {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    stream.getTracks().forEach(t => t.stop());
-                    elStatus.innerText = "CONCEDIT"; elStatus.style.color = "#28a745";
-                } else if (tipus === 'micro') {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    stream.getTracks().forEach(t => t.stop());
-                    elStatus.innerText = "CONCEDIT"; elStatus.style.color = "#28a745";
+                } else if (tipus === 'camera' || tipus === 'micro') {
+                    const constraints = tipus === 'camera' ? { video: true } : { audio: true };
+                    navigator.mediaDevices.getUserMedia(constraints)
+                        .then(stream => {
+                            stream.getTracks().forEach(t => t.stop());
+                            elStatus.innerText = "CONCEDIT";
+                            elStatus.style.color = "#28a745";
+                            resolve(true);
+                        })
+                        .catch(() => {
+                            elStatus.innerText = "DENEGAT";
+                            elStatus.style.color = "#dc3545";
+                            resolve(false);
+                        });
                 } else if (tipus === 'galeria') {
-                    elStatus.innerText = "CONCEDIT"; elStatus.style.color = "#28a745";
+                    elStatus.innerText = "CONCEDIT";
+                    elStatus.style.color = "#28a745";
+                    resolve(true);
                 }
-            } catch (err) {
-                elStatus.innerText = "ERROR"; elStatus.style.color = "#dc3545";
-                console.error("Error de permís:", tipus, err);
-            }
+            });
         };
 
         window.activarTot = async () => {
@@ -158,8 +173,8 @@
             document.getElementById('main').classList.add('active');
         };
 
-        // Càmera i escoltar
         document.getElementById('btn-camera-trigger').onclick = () => document.getElementById('camera-input').click();
+        
         document.getElementById('btn-escoltar').onclick = () => {
             if (monumentTrobat) {
                 window.speechSynthesis.cancel();
