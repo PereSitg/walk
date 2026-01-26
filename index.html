@@ -3,27 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sitges a la Butxaca</title>
+    <title>Sitges Walk</title>
     <style>
-        /* CONFIGURACIÓ GENERAL */
         :root {
             --blau-sitges: #0077cc;
-            --blau-mar: #005fa3;
             --blanc: #ffffff;
-            --gris-claret: #f8f9fa;
-            --text-fosc: #1c1e21;
+            --gris: #f0f2f5;
         }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--gris-claret);
+            font-family: sans-serif;
+            background-color: var(--gris);
             margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
         }
-
-        /* LA TARGETA (CARD) */
         .card {
             background: var(--blanc);
             border-radius: 20px;
@@ -31,99 +25,88 @@
             max-width: 400px;
             width: 100%;
             overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.05);
         }
-
-        /* CAPÇALERA AMB IMATGE */
         .image-header {
-            background: linear-gradient(135deg, var(--blau-sitges), var(--blau-mar));
-            height: 220px;
+            background: var(--blau-sitges);
+            height: 200px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.2rem;
-            font-weight: bold;
-            text-align: center;
-            padding: 20px;
         }
-
-        /* CONTINGUT */
-        .content {
-            padding: 25px;
+        .image-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-
-        .distancia-tag {
-            color: var(--blau-sitges);
-            background-color: #e1f5fe;
-            font-weight: bold;
-            font-size: 0.85rem;
-            padding: 6px 12px;
-            border-radius: 50px;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-
-        h1 {
-            font-size: 1.6rem;
-            margin: 0 0 12px 0;
-            color: var(--text-fosc);
-        }
-
-        p {
-            color: #4b4f56;
-            line-height: 1.6;
-            font-size: 1rem;
-            margin-bottom: 25px;
-        }
-
-        /* BOTONS */
+        .content { padding: 25px; }
+        h1 { margin: 0 0 10px 0; font-size: 1.5rem; }
+        p { line-height: 1.6; color: #444; }
         .btn {
             display: block;
             width: 100%;
             padding: 15px;
             margin-top: 10px;
-            border: none;
             border-radius: 12px;
             text-align: center;
             text-decoration: none;
             font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            box-sizing: border-box;
-            transition: transform 0.1s;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
             background-color: var(--blau-sitges);
             color: white;
-        }
-
-        .btn-secondary {
-            background-color: #e4e6eb;
-            color: var(--text-fosc);
         }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <div class="image-header">
-        📸 Imatge de Maricel
+<div class="card" id="app-card">
+    <div class="image-header" id="foto-monument">
+        📸 Foto en camí...
     </div>
     <div class="content">
-        <span class="distancia-tag">📍 Ets a 25 metres de tu</span>
-        <h1>Palau de Maricel</h1>
-        <p>Aquest palau és un somni fet realitat. Es va construir fa uns 100 anys sobre unes antigues cases de pescadors. No et perdis el 'Racó de la Calma' que hi ha a la vora; és un dels llocs més romàntics de Catalunya.</p>
-        
-        <a href="https://www.google.com/maps/search/?api=1&query=Palau+de+Maricel+Sitges" target="_blank" class="btn btn-primary">🗺️ Com arribar-hi</a>
-        <a href="#" class="btn btn-secondary">⏭️ Següent punt</a>
+        <h1 id="nom-monument">Carregant...</h1>
+        <p id="desc-monument">Estem connectant amb Sitges...</p>
+        <a href="#" id="link-maps" class="btn">🗺️ Com arribar-hi</a>
     </div>
 </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDQwBo1m8hoh1kk2AW7Tex51trJzeDBejU",
+    authDomain: "sitgeswalk.firebaseapp.com",
+    projectId: "sitgeswalk",
+    storageBucket: "sitgeswalk.firebasestorage.app",
+    messagingSenderId: "13367453792",
+    appId: "1:13367453792:web:ee3a8dbae2df721b8f3b05"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  async function carregarDades() {
+    const querySnapshot = await getDocs(collection(db, "monuments"));
+    
+    // Agafem el primer monument que trobem a la teva BBDD
+    if (!querySnapshot.empty) {
+        const monument = querySnapshot.docs[0].data();
+        
+        document.getElementById("nom-monument").innerText = monument.nom;
+        document.getElementById("desc-monument").innerText = monument.descripcio;
+        
+        // Si hi ha foto la posem, si no, deixem el text
+        if (monument.imatge) {
+            document.getElementById("foto-monument").innerHTML = `<img src="${monument.imatge}" alt="${monument.nom}">`;
+        }
+        
+        // Configurem el botó de Google Maps
+        document.getElementById("link-maps").href = `https://www.google.com/maps?q=${monument.lat},${monument.lon}`;
+    }
+  }
+
+  carregarDades();
+</script>
 
 </body>
 </html>
