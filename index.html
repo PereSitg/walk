@@ -13,14 +13,14 @@
 
         body, html {
             margin: 0; padding: 0; height: 100%;
-            font-family: -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--gris);
+            color: #333;
         }
 
-        /* PANTALLES */
         .screen {
             display: none;
-            height: 100vh;
+            min-height: 100vh;
             width: 100%;
             flex-direction: column;
             align-items: center;
@@ -33,37 +33,43 @@
         .active { display: flex; }
 
         /* BENVINGUDA */
-        #splash {
-            background-color: var(--blau-sitges);
-            color: white;
-        }
-        #splash h1 { font-size: 3rem; margin-bottom: 0; }
-        #splash p { font-weight: 300; opacity: 0.9; }
+        #splash { background-color: var(--blau-sitges); color: white; }
+        #splash h1 { font-size: 3.5rem; margin: 0; letter-spacing: -1px; }
+        #splash p { font-weight: 300; font-size: 1.2rem; opacity: 0.9; margin-top: 10px; }
 
-        /* MENÚ PRINCIPAL */
+        /* BOTONS */
         .btn-menu {
             width: 100%;
-            max-width: 300px;
-            padding: 20px;
-            margin: 10px 0;
+            max-width: 320px;
+            padding: 18px;
+            margin: 8px 0;
             border: none;
-            border-radius: 15px;
+            border-radius: 16px;
             background: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            font-size: 1.1rem;
-            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            font-size: 1.05rem;
+            font-weight: 600;
             color: var(--blau-sitges);
             cursor: pointer;
+            transition: transform 0.2s;
         }
+        .btn-menu:active { transform: scale(0.98); }
+        .btn-tornar { background: none; border: none; color: #888; margin-top: 20px; font-size: 1rem; cursor: pointer; }
 
-        /* FITXA MONUMENT */
+        /* FITXA */
         .card {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             max-width: 400px;
+            width: 100%;
             overflow: hidden;
+            text-align: left;
         }
+        #foto-monument img { width: 100%; height: 220px; object-fit: cover; }
+        .card-content { padding: 25px; }
+        .card-content h2 { margin: 0 0 12px 0; color: var(--blau-sitges); }
+        .card-content p { line-height: 1.6; font-size: 0.95rem; color: #555; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -74,53 +80,104 @@
     </div>
 
     <div id="menu" class="screen">
-        <h2>Què vols fer?</h2>
-        <button class="btn-menu" onclick="activarGPS()">📍 Quin monument és?</button>
-        <button class="btn-menu">🗺️ Fer una guia turística</button>
+        <h2>Benvingut a Sitges</h2>
+        <button class="btn-menu" onclick="localitzarUsuari('proper')">📍 Quin monument és?</button>
+        <button class="btn-menu" onclick="canviarPantalla('rutes')">🗺️ Fer una guia turística</button>
+    </div>
+
+    <div id="rutes" class="screen">
+        <h2>Quant temps tens?</h2>
+        <button class="btn-menu" onclick="localitzarUsuari('30min')">⏱️ 30 minuts</button>
+        <button class="btn-menu" onclick="localitzarUsuari('1h')">⌚ 1 hora</button>
+        <button class="btn-menu" onclick="localitzarUsuari('2h')">🚶 2 hores (Ruta completa)</button>
+        <button class="btn-menu" onclick="localitzarUsuari('tota')">🏰 Tota la ruta</button>
+        <button class="btn-menu" onclick="canviarPantalla('personalitzada')">✨ Personalitzada</button>
+        <button class="btn-tornar" onclick="canviarPantalla('menu')">⬅️ Tornar al inici</button>
     </div>
 
     <div id="detall" class="screen">
         <div class="card">
-            <div id="foto-monument" style="height:200px; background:#ddd;"></div>
-            <div style="padding:20px;">
-                <h1 id="nom-monument">...</h1>
-                <p id="desc-monument">...</p>
-                <button class="btn-menu" onclick="tornarMenu()">Tornar al menú</button>
+            <div id="foto-monument"></div>
+            <div class="card-content">
+                <h2 id="nom-monument">Carregant...</h2>
+                <p id="desc-monument">Buscant informació a la base de dades...</p>
+                <button class="btn-menu" id="btn-com-arribar" style="background: var(--blau-sitges); color: white;">🗺️ Com arribar-hi</button>
+                <button class="btn-tornar" onclick="canviarPantalla('menu')" style="width:100%">Tornar al menú</button>
             </div>
         </div>
     </div>
 
     <script type="module">
-        // Simulació de transició de benvinguda
-        setTimeout(() => {
-            canviarPantalla('menu');
-        }, 3000);
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQwBo1m8hoh1kk2AW7Tex51trJzeDBejU",
+            authDomain: "sitgeswalk.firebaseapp.com",
+            projectId: "sitgeswalk",
+            storageBucket: "sitgeswalk.firebasestorage.app",
+            messagingSenderId: "13367453792",
+            appId: "1:13367453792:web:ee3a8dbae2df721b8f3b05"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Funció per canviar de "pantalla"
         window.canviarPantalla = function(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+        };
+
+        // Splash screen: 3 segons
+        setTimeout(() => canviarPantalla('menu'), 3000);
+
+        // Fórmula de Haversine per calcular distància
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; 
+            const p1 = lat1 * Math.PI / 180;
+            const p2 = lat2 * Math.PI / 180;
+            const dp = (lat2 - lat1) * Math.PI / 180;
+            const dl = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        window.activarGPS = function() {
-            if (!navigator.geolocation) {
-                alert("El teu navegador no suporta GPS.");
-                return;
-            }
+        window.localitzarUsuari = function(tipusRuta) {
+            if (!navigator.geolocation) return alert("GPS no disponible");
 
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    console.log("Latitud:", pos.coords.latitude);
-                    // Aquí connectarem amb Firebase per buscar el més proper
-                    canviarPantalla('detall');
-                    document.getElementById('nom-monument').innerText = "Buscant monument proper...";
-                },
-                (err) => {
-                    alert("Has de permetre el GPS per fer servir aquesta funció.");
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const uLat = pos.coords.latitude;
+                const uLon = pos.coords.longitude;
+                
+                const querySnapshot = await getDocs(collection(db, "monuments"));
+                let llista = [];
+                querySnapshot.forEach(doc => {
+                    let d = doc.data();
+                    d.distancia = calcularDistancia(uLat, uLon, d.lat, d.lon);
+                    llista.push(d);
+                });
+
+                // Ordenem per proximitat
+                llista.sort((a, b) => a.distancia - b.distancia);
+
+                if (tipusRuta === 'proper') {
+                    mostrarMonument(llista[0]);
+                } else {
+                    alert("Has triat: " + tipusRuta + ". Properament calcularem la millor ruta des d'aquí!");
                 }
-            );
-        }
+            }, () => alert("Cal acceptar el GPS"));
+        };
 
-        window.tornarMenu = () => canviarPantalla('menu');
+        function mostrarMonument(m) {
+            document.getElementById('nom-monument').innerText = m.nom;
+            document.getElementById('desc-monument').innerText = m.descripcio;
+            document.getElementById('foto-monument').innerHTML = m.imatge ? `<img src="${m.imatge}">` : "";
+            document.getElementById('btn-com-arribar').onclick = () => {
+                window.open(`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}`);
+            };
+            canviarPantalla('detall');
+        }
     </script>
 </body>
 </html>
