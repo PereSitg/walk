@@ -2,266 +2,202 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SitgesWalk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SitgesWalk Pro</title>
     <style>
         :root {
             --blau-sitges: #0077cc;
             --blanc: #ffffff;
-            --gris: #f8f9fa;
+            --gris: #f1f3f5;
+            --exit: #28a745;
         }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--gris);
-            color: #333;
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--gris); overflow: hidden;
         }
 
         .screen {
-            display: none;
-            min-height: 100vh;
-            width: 100%;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
+            display: none; height: 100vh; width: 100%;
+            flex-direction: column; align-items: center; justify-content: center;
+            padding: 25px; box-sizing: border-box; text-align: center;
         }
 
         .active { display: flex; }
 
-        /* BENVINGUDA */
-        #splash { background-color: var(--blau-sitges); color: white; }
-        #splash h1 { font-size: 3.5rem; margin: 0; letter-spacing: -1px; }
-        #splash p { font-weight: 300; font-size: 1.2rem; opacity: 0.9; margin-top: 10px; }
+        /* PANTALLA PERMISOS */
+        #setup { background: white; }
+        .permis-box {
+            background: #f8f9fa; padding: 15px; border-radius: 15px;
+            margin: 10px 0; width: 100%; max-width: 300px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .status { font-size: 0.8rem; font-weight: bold; }
+        .pendent { color: #f0ad4e; }
+        .concedit { color: var(--exit); }
 
         /* BOTONS */
-        .btn-menu {
-            width: 100%;
-            max-width: 320px;
-            padding: 18px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 16px;
-            background: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: var(--blau-sitges);
-            cursor: pointer;
-            transition: transform 0.2s;
+        .btn-principal {
+            background: var(--blau-sitges); color: white;
+            border: none; padding: 18px 40px; border-radius: 50px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,119,204,0.3);
+            margin-top: 20px; width: 100%; max-width: 300px;
         }
-        .btn-menu:active { transform: scale(0.98); }
-        .btn-tornar { background: none; border: none; color: #888; margin-top: 20px; font-size: 1rem; cursor: pointer; }
 
-        /* FITXA */
-        .card {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            max-width: 400px;
-            width: 100%;
-            overflow: hidden;
-            text-align: left;
-        }
-        #foto-monument img { width: 100%; height: 220px; object-fit: cover; }
-        .card-content { padding: 25px; }
-        .card-content h2 { margin: 0 0 12px 0; color: var(--blau-sitges); }
-        .card-content p { line-height: 1.6; font-size: 0.95rem; color: #555; margin-bottom: 20px; }
-
-        /* CHATBOT */
-        #chat-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-        #chat-button {
-            background: var(--blau-sitges);
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
+        /* CHAT INTERFACE */
         #chat-window {
-            display: none;
-            width: 300px;
-            height: 400px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            margin-bottom: 15px;
-            flex-direction: column;
-            overflow: hidden;
+            display: none; position: fixed; bottom: 90px; right: 20px;
+            width: 320px; height: 450px; background: white;
+            border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            flex-direction: column; overflow: hidden; z-index: 2000;
         }
-        #chat-header { background: var(--blau-sitges); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; }
-        #chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px; border-radius: 12px; font-size: 0.9rem; max-width: 80%; }
-        .bot { background: #eee; align-self: flex-start; }
-        .user { background: var(--blau-sitges); color: white; align-self: flex-end; }
-        #chat-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; }
-        #chat-input { flex: 1; border: none; outline: none; padding: 5px; }
+
+        #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 12px; border-radius: 15px; font-size: 0.95rem; max-width: 80%; line-height: 1.4; }
+        .bot { background: #e9ecef; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .user { background: var(--blau-sitges); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+        .chat-controls { display: flex; padding: 10px; border-top: 1px solid #eee; background: white; align-items: center; }
+        .chat-controls input { flex: 1; border: none; padding: 10px; outline: none; }
+        .icon-btn { font-size: 1.5rem; cursor: pointer; padding: 0 10px; background: none; border: none; }
+
+        #chat-trigger {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 65px; height: 65px; background: var(--blau-sitges);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 30px; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
 
-    <div id="splash" class="screen active">
-        <h1>SitgesWalk</h1>
-        <p>by Pere Badia i Lorenz</p>
+    <div id="setup" class="screen active">
+        <h1 style="color: var(--blau-sitges); margin-bottom: 5px;">SitgesWalk</h1>
+        <p style="margin-bottom: 30px; color: #666;">Configuració de l'experiència</p>
+        
+        <div class="permis-box">
+            <span>🌍 Localització GPS</span>
+            <span id="st-gps" class="status pendent">PENDENT</span>
+        </div>
+        <div class="permis-box">
+            <span>🎙️ Micròfon (Guia)</span>
+            <span id="st-micro" class="status pendent">PENDENT</span>
+        </div>
+        <div class="permis-box">
+            <span>🖼️ Galeria de fotos</span>
+            <span id="st-galeria" class="status pendent">PENDENT</span>
+        </div>
+
+        <button class="btn-principal" onclick="demanarTotsElsPermisos()">ACTIVAR APP</button>
     </div>
 
     <div id="menu" class="screen">
-        <h2>Benvingut a Sitges</h2>
-        <button class="btn-menu" onclick="localitzarUsuari('proper')">📍 Quin monument és?</button>
-        <button class="btn-menu" onclick="canviarPantalla('rutes')">🗺️ Fer una guia turística</button>
+        <h2>Hola! Estàs a Sitges?</h2>
+        <button class="btn-principal" onclick="alert('Buscant el monument més proper...')">📍 QUIN MONUMENT ÉS?</button>
+        <button class="btn-principal" style="background:white; color:var(--blau-sitges);">🗺️ RUTES TURÍSTIQUES</button>
     </div>
 
-    <div id="rutes" class="screen">
-        <h2>Quant temps tens?</h2>
-        <button class="btn-menu" onclick="localitzarUsuari('30min')">⏱️ 30 minuts</button>
-        <button class="btn-menu" onclick="localitzarUsuari('1h')">⌚ 1 hora</button>
-        <button class="btn-menu" onclick="localitzarUsuari('2h')">🚶 2 hores</button>
-        <button class="btn-menu" onclick="localitzarUsuari('tota')">🏰 Tota la ruta</button>
-        <button class="btn-menu" onclick="canviarPantalla('personalitzada')">✨ Personalitzada</button>
-        <button class="btn-tornar" onclick="canviarPantalla('menu')">⬅️ Tornar a l'inici</button>
-    </div>
-
-    <div id="detall" class="screen">
-        <div class="card">
-            <div id="foto-monument"></div>
-            <div class="card-content">
-                <h2 id="nom-monument">Carregant...</h2>
-                <p id="desc-monument">Buscant informació...</p>
-                <button class="btn-menu" id="btn-com-arribar" style="background: var(--blau-sitges); color: white;">🗺️ Com arribar-hi</button>
-                <button class="btn-tornar" onclick="canviarPantalla('menu')" style="width:100%">Tornar al menú</button>
-            </div>
+    <div id="chat-window">
+        <div style="background:var(--blau-sitges); color:white; padding:15px; font-weight:bold; display:flex; justify-content:space-between;">
+            <span>Guia SitgesWalk</span>
+            <span onclick="toggleChat()" style="cursor:pointer">✕</span>
+        </div>
+        <div id="chat-messages">
+            <div class="msg bot">Hola! Soc el teu guia personal. Em pots parlar o escriure.</div>
+        </div>
+        <div class="chat-controls">
+            <button class="icon-btn" onclick="activarVeu()">🎙️</button>
+            <input type="text" id="chat-input" placeholder="Escriu aquí...">
+            <button class="icon-btn" onclick="enviarMissatge()">🚀</button>
         </div>
     </div>
 
-    <div id="chat-container">
-        <div id="chat-window">
-            <div id="chat-header"><span>Guia SitgesWalk</span><span onclick="toggleChat()" style="cursor:pointer">✖</span></div>
-            <div id="chat-messages"><div class="msg bot">Hola! Soc el teu guia de Sitges. Pregunta'm el que vulguis!</div></div>
-            <div id="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Escriu aquí...">
-                <button onclick="enviarMissatge()" style="border:none; background:none; cursor:pointer">🚀</button>
-            </div>
-        </div>
-        <div id="chat-button" onclick="toggleChat()">💬</div>
-    </div>
+    <div id="chat-trigger" onclick="toggleChat()">💬</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <script>
+        // --- GESTIÓ DE PERMISOS PROFESSIONALS ---
+        async function demanarTotsElsPermisos() {
+            try {
+                // 1. GPS
+                const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
+                document.getElementById('st-gps').innerText = "OK";
+                document.getElementById('st-gps').className = "status concedit";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDQwBo1m8hoh1kk2AW7Tex51trJzeDBejU",
-            authDomain: "sitgeswalk.firebaseapp.com",
-            projectId: "sitgeswalk",
-            storageBucket: "sitgeswalk.firebasestorage.app",
-            messagingSenderId: "13367453792",
-            appId: "1:13367453792:web:ee3a8dbae2df721b8f3b05"
-        };
+                // 2. MICRÒFON
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+                document.getElementById('st-micro').innerText = "OK";
+                document.getElementById('st-micro').className = "status concedit";
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+                // 3. GALERIA (Simulació d'accés a fitxers)
+                document.getElementById('st-galeria').innerText = "OK";
+                document.getElementById('st-galeria').className = "status concedit";
 
-        window.canviarPantalla = function(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        };
+                // Tot OK -> Passem al menú
+                setTimeout(() => {
+                    document.getElementById('setup').classList.remove('active');
+                    document.getElementById('menu').classList.add('active');
+                    parlar("Benvingut a Sitges Walk. Estic llesta per guiar-te.");
+                }, 1000);
 
-        setTimeout(() => canviarPantalla('menu'), 3000);
+            } catch (err) {
+                alert("Per a una experiència completa, cal acceptar tots els permisos.");
+            }
+        }
 
-        // BOT OBERT: Lògica de respostes
-        window.enviarMissatge = function() {
+        // --- LÒGICA DE VEU (Català) ---
+        function parlar(text) {
+            const ut = new SpeechSynthesisUtterance(text);
+            ut.lang = 'ca-ES';
+            window.speechSynthesis.speak(ut);
+        }
+
+        function activarVeu() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'ca-ES';
+            recognition.start();
+
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                document.getElementById('chat-input').value = text;
+                enviarMissatge();
+            };
+        }
+
+        // --- XATBOT OBERT ---
+        function enviarMissatge() {
             const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            const msg = text.toLowerCase();
-            if (!text) return;
+            const msg = input.value.trim().toLowerCase();
+            if(!msg) return;
 
-            afegirMissatge(text, 'user');
+            afegirMsg(input.value, 'user');
             input.value = '';
 
+            // Simulació de "pensament"
             setTimeout(() => {
-                let resposta = "Aquesta idea és molt bona! Encara estic aprenent, però en Pere m'ha dit que aviat sabré respondre a tot sobre Sitges.";
+                let resposta = "Molt interessant! Com a guia de Sitges, encara estic aprenent detalls sobre això. En Pere m'està ensenyant molt!";
                 
-                // Sistema obert de paraules clau
-                if (msg.includes("hola")) resposta = "Hola! Com va la teva visita per Sitges?";
-                if (msg.includes("menjar") || msg.includes("restaurant")) resposta = "T'agradaria provar el Xató o prefereixes un arròs al Passeig?";
-                if (msg.includes("festa")) resposta = "Sitges és festa tot l'any! El Carnaval i la Festa Major són els millors moments.";
-                if (msg.includes("museu")) resposta = "No et pots perdre el Cau Ferrat i el Maricel, són joies del Modernisme.";
-                if (msg.includes("platja")) resposta = "T'agrada el soroll? Ves a la Ribera. Vols calma? Ves a Aiguadolç.";
+                if(msg.includes("hola")) resposta = "Hola! Vols que anem a veure la Punta o prefereixes un museu?";
+                if(msg.includes("punta") || msg.includes("església")) resposta = "L'església de Sant Bartomeu és del segle XVII. Les vistes des d'allà són brutals!";
+                if(msg.includes("platja")) resposta = "A Sitges tenim 17 platges. La de Sant Sebastià és la meva preferida!";
 
-                afegirMissatge(resposta, 'bot');
+                afegirMsg(resposta, 'bot');
+                parlar(resposta);
             }, 800);
-        };
+        }
 
-        function afegirMissatge(text, tipus) {
-            const container = document.getElementById('chat-messages');
+        function afegirMsg(text, tipus) {
             const div = document.createElement('div');
             div.className = `msg ${tipus}`;
             div.innerText = text;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
+            document.getElementById('chat-messages').appendChild(div);
+            document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
         }
 
-        window.toggleChat = function() {
+        function toggleChat() {
             const win = document.getElementById('chat-window');
             win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
-        };
-
-        // GPS I RUTES
-        function calcularDistancia(lat1, lon1, lat2, lon2) {
-            const R = 6371e3;
-            const p1 = lat1 * Math.PI / 180;
-            const p2 = lat2 * Math.PI / 180;
-            const dp = (lat2 - lat1) * Math.PI / 180;
-            const dl = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
-
-        window.localitzarUsuari = function(tipusRuta) {
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const uLat = pos.coords.latitude;
-                const uLon = pos.coords.longitude;
-                const querySnapshot = await getDocs(collection(db, "monuments"));
-                let llista = [];
-                querySnapshot.forEach(doc => {
-                    let d = doc.data();
-                    d.distancia = calcularDistancia(uLat, uLon, d.lat, d.lon);
-                    llista.push(d);
-                });
-                llista.sort((a, b) => a.distancia - b.distancia);
-
-                if (tipusRuta === 'proper') {
-                    mostrarMonument(llista[0]);
-                } else {
-                    alert("Opció '" + tipusRuta + "' seleccionada. Properament traçarem aquesta ruta!");
-                }
-            }, () => alert("Si us plau, activa el GPS."));
-        };
-
-        function mostrarMonument(m) {
-            document.getElementById('nom-monument').innerText = m.nom;
-            document.getElementById('desc-monument').innerText = m.descripcio;
-            document.getElementById('foto-monument').innerHTML = m.imatge ? `<img src="${m.imatge}">` : "";
-            document.getElementById('btn-com-arribar').onclick = () => {
-                window.open(`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}`);
-            };
-            canviarPantalla('detall');
         }
     </script>
 </body>
