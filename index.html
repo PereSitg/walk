@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SitgesWalk Pro</title>
+    <title>SitgesWalk Pro (Firebase)</title>
     <style>
         :root {
             --blau-sitges: #0077cc;
@@ -80,81 +80,74 @@
         <h1 id="txt-titol">SitgesWalk</h1>
         <p id="txt-subtitol">Configuració de l'experiència</p>
         
-        <div class="permis-box" onclick="demanarPermis('gps')">
+        <div class="permis-box" id="box-gps">
             <span id="label-gps">🌍 Localització GPS</span>
             <span id="st-gps" class="status pendent">---</span>
         </div>
-        <div class="permis-box" onclick="demanarPermis('micro')">
+        <div class="permis-box" id="box-micro">
             <span id="label-micro">🎙️ Micròfon (Guia)</span>
             <span id="st-micro" class="status pendent">---</span>
         </div>
-        <div class="permis-box" onclick="demanarPermis('galeria')">
+        <div class="permis-box" id="box-galeria">
             <span id="label-galeria">🖼️ Galeria de fotos</span>
             <span id="st-galeria" class="status pendent">---</span>
         </div>
 
-        <button class="btn-principal" id="btn-activar" onclick="demanarTotsElsPermisos()">ACTIVAR APP</button>
+        <button class="btn-principal" id="btn-activar">ACTIVAR APP</button>
     </div>
 
     <div id="menu" class="screen">
         <h2 id="txt-salutacio">Hola! Estàs a Sitges?</h2>
-        <button class="btn-principal" id="btn-proper" onclick="alert('Buscant...')">📍 QUIN MONUMENT ÉS?</button>
+        <button class="btn-principal" id="btn-proper">📍 QUIN MONUMENT ÉS?</button>
         <button class="btn-principal" id="btn-rutes" style="background:white; color:var(--blau-sitges);">🗺️ RUTES TURÍSTIQUES</button>
     </div>
 
     <div id="chat-window">
         <div style="background:var(--blau-sitges); color:white; padding:15px; font-weight:bold; display:flex; justify-content:space-between;">
             <span id="chat-header-title">Guia SitgesWalk</span>
-            <span onclick="toggleChat()" style="cursor:pointer">✕</span>
+            <span id="chat-close" style="cursor:pointer">✕</span>
         </div>
         <div id="chat-messages">
             <div class="msg bot" id="chat-welcome-msg">Hola!</div>
         </div>
         <div class="chat-controls">
-            <button class="icon-btn" onclick="activarVeu()">🎙️</button>
+            <button class="icon-btn" id="btn-veu">🎙️</button>
             <input type="text" id="chat-input" placeholder="...">
-            <button class="icon-btn" onclick="enviarMissatge()">🚀</button>
+            <button class="icon-btn" id="btn-enviar">🚀</button>
         </div>
     </div>
 
-    <div id="chat-trigger" onclick="toggleChat()">💬</div>
+    <div id="chat-trigger">💬</div>
 
-    <script>
-        // --- DICCIONARI MULTI-IDIOMA ---
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // CONFIGURACIÓ FIREBASE (Copia les teves dades aquí)
+        const firebaseConfig = {
+            apiKey: "ESCRIU_AQUI_LA_TEVA_API_KEY",
+            authDomain: "el-teu-projecte.firebaseapp.com",
+            projectId: "el-teu-projecte",
+            storageBucket: "el-teu-projecte.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- DICCIONARI ---
         const i18n = {
-            ca: { 
-                titol: "SitgesWalk", subt: "Configuració", gps: "🌍 Localització GPS", micro: "🎙️ Micròfon", galeria: "🖼️ Galeria", 
-                btnAct: "ACTIVAR APP", salut: "Hola! Estàs a Sitges?", btnProp: "📍 QUIN MONUMENT ÉS?", btnRut: "🗺️ RUTES", 
-                pend: "PENDENT", ok: "CONCEDIT", welcome: "Benvingut! Estic llesta per guiar-te.", 
-                chatInit: "Hola! Puc ajudar-te amb la veu o text.", placeholder: "Escriu aquí...",
-                respCapVila: "El Cap de la Vila és el centre històric de Sitges, famós pel seu edifici amb el rellotge i per ser el punt de trobada principal.",
-                respPunta: "La Punta és l'església de Sant Bartomeu i Santa Tecla, la icona més famosa del perfil de Sitges.",
-                respDefault: "Encara estic aprenent detalls sobre aquest lloc. En Pere m'està posant molta informació nova!"
-            },
-            es: { 
-                titol: "SitgesWalk", subt: "Configuración", gps: "🌍 Localización GPS", micro: "🎙️ Micrófono", galeria: "🖼️ Galería", 
-                btnAct: "ACTIVAR APP", salut: "¿Hola! Estás en Sitges?", btnProp: "📍 ¿QUÉ MONUMENTO ES?", btnRut: "🗺️ RUTAS", 
-                pend: "PENDIENTE", ok: "CONCEDIDO", welcome: "¡Bienvenido! Estoy lista para guiarte.", 
-                chatInit: "Hola! Puedo ayudarte con voz o texto.", placeholder: "Escribe aquí...",
-                respCapVila: "El Cap de la Vila es el centro histórico de Sitges, famoso por su edificio con el reloj y por ser el principal punto de encuentro.",
-                respPunta: "La Punta es la iglesia de Sant Bartomeu y Santa Tecla, el icono más famoso del perfil de Sitges.",
-                respDefault: "Aún estoy aprendiendo sobre este lugar. ¡Pere me está dando mucha información nueva!"
-            },
-            en: { 
-                titol: "SitgesWalk", subt: "Setup", gps: "🌍 GPS Location", micro: "🎙️ Microphone", galeria: "🖼️ Gallery", 
-                btnAct: "ACTIVATE APP", salut: "Hi! Are you in Sitges?", btnProp: "📍 WHICH MONUMENT?", btnRut: "🗺️ ROUTES", 
-                pend: "PENDING", ok: "GRANTED", welcome: "Welcome! I'm ready to guide you.", 
-                chatInit: "Hi! I can help you via voice or text.", placeholder: "Type here...",
-                respCapVila: "Cap de la Vila is the historic center of Sitges, famous for its clock building and for being the main meeting point.",
-                respPunta: "La Punta is the church of Sant Bartomeu and Santa Tecla, the most famous icon of the Sitges skyline.",
-                respDefault: "I'm still learning about this place. Pere is giving me a lot of new information!"
-            }
+            ca: { titol: "SitgesWalk", subt: "Configuració", gps: "🌍 Localització GPS", micro: "🎙️ Micròfon", galeria: "🖼️ Galeria", btnAct: "ACTIVAR APP", salut: "Hola! Estàs a Sitges?", btnProp: "📍 QUIN MONUMENT ÉS?", btnRut: "🗺️ RUTES", pend: "PENDENT", ok: "CONCEDIT", welcome: "Benvingut! Soc el teu guia de Sitges.", placeholder: "Escriu...", default: "No trobo informació sobre això a la base de dades." },
+            es: { titol: "SitgesWalk", subt: "Configuración", gps: "🌍 Localización GPS", micro: "🎙️ Micrófono", galeria: "🖼️ Galería", btnAct: "ACTIVAR APP", salut: "¿Hola! Estás en Sitges?", btnProp: "📍 ¿QUÉ MONUMENTO ES?", btnRut: "🗺️ RUTAS", pend: "PENDIENTE", ok: "CONCEDIDO", welcome: "¡Bienvenido! Soy tu guía de Sitges.", placeholder: "Escribe...", default: "No encuentro información en la base de datos." },
+            en: { titol: "SitgesWalk", subt: "Setup", gps: "🌍 GPS Location", micro: "🎙️ Microphone", galeria: "🖼️ Gallery", btnAct: "ACTIVATE APP", salut: "Hi! Are you in Sitges?", btnProp: "📍 WHICH MONUMENT?", btnRut: "🗺️ ROUTES", pend: "PENDING", ok: "GRANTED", welcome: "Welcome! I am your Sitges guide.", placeholder: "Type...", default: "I can't find information about that in the database." }
         };
 
         let lang = navigator.language.split('-')[0];
         if (!i18n[lang]) lang = 'en';
         const t = i18n[lang];
 
+        // --- FUNCIONS GLOBALS ---
         window.onload = () => {
             document.getElementById('txt-titol').innerText = t.titol;
             document.getElementById('txt-subtitol').innerText = t.subt;
@@ -165,36 +158,26 @@
             document.getElementById('txt-salutacio').innerText = t.salut;
             document.getElementById('btn-proper').innerText = t.btnProp;
             document.getElementById('btn-rutes').innerText = t.btnRut;
-            document.getElementById('chat-welcome-msg').innerText = t.chatInit;
+            document.getElementById('chat-welcome-msg').innerText = t.welcome;
             document.getElementById('chat-input').placeholder = t.placeholder;
             document.querySelectorAll('.status').forEach(el => el.innerText = t.pend);
         };
 
-        // --- GESTIÓ DE PERMISOS ---
         const permisos = { gps: false, micro: false, galeria: false };
 
         async function demanarPermis(tipus) {
             try {
                 if (tipus === 'gps') {
                     await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
-                    actualitzarStatus('st-gps');
-                    permisos.gps = true;
+                    actualitzarStatus('st-gps'); permisos.gps = true;
                 } else if (tipus === 'micro') {
                     await navigator.mediaDevices.getUserMedia({ audio: true });
-                    actualitzarStatus('st-micro');
-                    permisos.micro = true;
+                    actualitzarStatus('st-micro'); permisos.micro = true;
                 } else if (tipus === 'galeria') {
-                    actualitzarStatus('st-galeria');
-                    permisos.galeria = true;
+                    actualitzarStatus('st-galeria'); permisos.galeria = true;
                 }
                 verificarFinalitzacio();
-            } catch (e) { console.log("Permís denegat:", tipus); }
-        }
-
-        async function demanarTotsElsPermisos() {
-            await demanarPermis('gps');
-            await demanarPermis('micro');
-            await demanarPermis('galeria');
+            } catch (e) { console.warn("Denegat", tipus); }
         }
 
         function actualitzarStatus(id) {
@@ -213,48 +196,43 @@
             }
         }
 
-        // --- VEU I XAT INTEL·LIGENT ---
         function parlar(text) {
             const ut = new SpeechSynthesisUtterance(text);
             ut.lang = lang === 'ca' ? 'ca-ES' : (lang === 'es' ? 'es-ES' : 'en-US');
             window.speechSynthesis.speak(ut);
         }
 
-        function activarVeu() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return;
-            const recognition = new SpeechRecognition();
-            recognition.lang = lang === 'ca' ? 'ca-ES' : (lang === 'es' ? 'es-ES' : 'en-US');
-            recognition.start();
-            recognition.onresult = (e) => {
-                document.getElementById('chat-input').value = e.results[0][0].transcript;
-                enviarMissatge();
-            };
-        }
-
-        function enviarMissatge() {
+        // --- LÒGICA FIREBASE CERCA ---
+        async function enviarMissatge() {
             const input = document.getElementById('chat-input');
-            const val = input.value.trim();
-            if (!val) return;
-            afegirMsg(val, 'user');
+            const userText = input.value.trim();
+            if (!userText) return;
+
+            afegirMsg(userText, 'user');
             input.value = '';
-            
-            setTimeout(() => {
-                let r = t.respDefault;
-                const userMsg = val.toLowerCase();
 
-                // Lògica de respostes intel·ligents
-                if (userMsg.includes("cap de la vila")) {
-                    r = t.respCapVila;
-                } else if (userMsg.includes("punta") || userMsg.includes("església") || userMsg.includes("iglesia")) {
-                    r = t.respPunta;
-                } else if (userMsg.includes("hola")) {
-                    r = t.welcome;
-                }
+            try {
+                // Busquem a la col·lecció "monuments" de Firebase
+                const querySnapshot = await getDocs(collection(db, "monuments"));
+                let resposta = t.default;
 
-                afegirMsg(r, 'bot');
-                parlar(r);
-            }, 600);
+                querySnapshot.forEach((doc) => {
+                    const dades = doc.data();
+                    // Si el nom del monument de Firebase està en la pregunta de l'usuari
+                    if (userText.toLowerCase().includes(dades.nom.toLowerCase())) {
+                        resposta = dades.descripcio;
+                    }
+                });
+
+                if (userText.toLowerCase().includes("hola")) resposta = t.welcome;
+
+                afegirMsg(resposta, 'bot');
+                parlar(resposta);
+
+            } catch (error) {
+                console.error("Error Firebase:", error);
+                afegirMsg("Error de connexió amb Firebase.", 'bot');
+            }
         }
 
         function afegirMsg(txt, cl) {
@@ -264,6 +242,22 @@
             document.getElementById('chat-messages').appendChild(d);
             document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
         }
+
+        // --- EVENTS (A causa del "module", cal fer-ho amb addEventListener) ---
+        document.getElementById('box-gps').onclick = () => demanarPermis('gps');
+        document.getElementById('box-micro').onclick = () => demanarPermis('micro');
+        document.getElementById('box-galeria').onclick = () => demanarPermis('galeria');
+        document.getElementById('btn-activar').onclick = () => { demanarPermis('gps'); demanarPermis('micro'); demanarPermis('galeria'); };
+        document.getElementById('btn-enviar').onclick = enviarMissatge;
+        document.getElementById('btn-veu').onclick = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const rec = new SpeechRecognition();
+            rec.lang = lang === 'ca' ? 'ca-ES' : 'es-ES';
+            rec.start();
+            rec.onresult = (e) => { document.getElementById('chat-input').value = e.results[0][0].transcript; enviarMissatge(); };
+        };
+        document.getElementById('chat-trigger').onclick = toggleChat;
+        document.getElementById('chat-close').onclick = toggleChat;
 
         function toggleChat() {
             const w = document.getElementById('chat-window');
