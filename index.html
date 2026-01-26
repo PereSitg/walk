@@ -89,10 +89,10 @@
         <h2>Quant temps tens?</h2>
         <button class="btn-menu" onclick="localitzarUsuari('30min')">⏱️ 30 minuts</button>
         <button class="btn-menu" onclick="localitzarUsuari('1h')">⌚ 1 hora</button>
-        <button class="btn-menu" onclick="localitzarUsuari('2h')">🚶 2 hores (Ruta completa)</button>
+        <button class="btn-menu" onclick="localitzarUsuari('2h')">🚶 2 hores</button>
         <button class="btn-menu" onclick="localitzarUsuari('tota')">🏰 Tota la ruta</button>
         <button class="btn-menu" onclick="canviarPantalla('personalitzada')">✨ Personalitzada</button>
-        <button class="btn-tornar" onclick="canviarPantalla('menu')">⬅️ Tornar al inici</button>
+        <button class="btn-tornar" onclick="canviarPantalla('menu')">⬅️ Tornar a l'inici</button>
     </div>
 
     <div id="detall" class="screen">
@@ -100,7 +100,7 @@
             <div id="foto-monument"></div>
             <div class="card-content">
                 <h2 id="nom-monument">Carregant...</h2>
-                <p id="desc-monument">Buscant informació a la base de dades...</p>
+                <p id="desc-monument">Buscant informació...</p>
                 <button class="btn-menu" id="btn-com-arribar" style="background: var(--blau-sitges); color: white;">🗺️ Com arribar-hi</button>
                 <button class="btn-tornar" onclick="canviarPantalla('menu')" style="width:100%">Tornar al menú</button>
             </div>
@@ -123,16 +123,13 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Funció per canviar de "pantalla"
         window.canviarPantalla = function(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         };
 
-        // Splash screen: 3 segons
         setTimeout(() => canviarPantalla('menu'), 3000);
 
-        // Fórmula de Haversine per calcular distància
         function calcularDistancia(lat1, lon1, lat2, lon2) {
             const R = 6371e3; 
             const p1 = lat1 * Math.PI / 180;
@@ -158,13 +155,12 @@
                     llista.push(d);
                 });
 
-                // Ordenem per proximitat
                 llista.sort((a, b) => a.distancia - b.distancia);
 
                 if (tipusRuta === 'proper') {
                     mostrarMonument(llista[0]);
                 } else {
-                    alert("Has triat: " + tipusRuta + ". Properament calcularem la millor ruta des d'aquí!");
+                    alert("Has triat l'opció: " + tipusRuta + ". Estic treballant per traçar la teva millor ruta des d'aquí!");
                 }
             }, () => alert("Cal acceptar el GPS"));
         };
