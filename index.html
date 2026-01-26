@@ -5,78 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sitges a la Butxaca</title>
     <style>
-        /* CSS per a que sembli una App de mòbil */
+        /* CONFIGURACIÓ GENERAL */
+        :root {
+            --blau-sitges: #0077cc;
+            --blau-mar: #005fa3;
+            --blanc: #ffffff;
+            --gris-claret: #f8f9fa;
+            --text-fosc: #1c1e21;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
+            background-color: var(--gris-claret);
             margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
         }
+
+        /* LA TARGETA (CARD) */
         .card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: var(--blanc);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             max-width: 400px;
-            overflow: hidden;
             width: 100%;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
         }
-        .image-placeholder {
-            background: #0077cc;
-            height: 200px;
+
+        /* CAPÇALERA AMB IMATGE */
+        .image-header {
+            background: linear-gradient(135deg, var(--blau-sitges), var(--blau-mar));
+            height: 220px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            font-size: 1.2rem;
             font-weight: bold;
-        }
-        .content {
+            text-align: center;
             padding: 20px;
         }
-        h1 {
-            font-size: 1.5rem;
-            margin: 0 0 10px 0;
-            color: #1c1e21;
+
+        /* CONTINGUT */
+        .content {
+            padding: 25px;
         }
-        .distancia {
-            color: #0077cc;
+
+        .distancia-tag {
+            color: var(--blau-sitges);
+            background-color: #e1f5fe;
             font-weight: bold;
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 50px;
+            display: inline-block;
             margin-bottom: 15px;
-            display: block;
         }
+
+        h1 {
+            font-size: 1.6rem;
+            margin: 0 0 12px 0;
+            color: var(--text-fosc);
+        }
+
         p {
             color: #4b4f56;
-            line-height: 1.5;
+            line-height: 1.6;
+            font-size: 1rem;
+            margin-bottom: 25px;
         }
+
+        /* BOTONS */
         .btn {
             display: block;
             width: 100%;
-            padding: 12px;
+            padding: 15px;
             margin-top: 10px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             text-align: center;
             text-decoration: none;
             font-weight: bold;
+            font-size: 1rem;
             cursor: pointer;
+            box-sizing: border-box;
+            transition: transform 0.1s;
         }
-        .btn-primary { background-color: #0077cc; color: white; }
-        .btn-secondary { background-color: #e4e6eb; color: #1c1e21; }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: var(--blau-sitges);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #e4e6eb;
+            color: var(--text-fosc);
+        }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div class="image-placeholder">
-        📸 Imatge del Monument
+    <div class="image-header">
+        📸 Imatge de Maricel
     </div>
     <div class="content">
-        <span class="distancia">📍 Ets a 25 metres</span>
+        <span class="distancia-tag">📍 Ets a 25 metres de tu</span>
         <h1>Palau de Maricel</h1>
         <p>Aquest palau és un somni fet realitat. Es va construir fa uns 100 anys sobre unes antigues cases de pescadors. No et perdis el 'Racó de la Calma' que hi ha a la vora; és un dels llocs més romàntics de Catalunya.</p>
         
-        <a href="#" class="btn btn-primary">🗺️ Com arribar-hi</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Palau+de+Maricel+Sitges" target="_blank" class="btn btn-primary">🗺️ Com arribar-hi</a>
         <a href="#" class="btn btn-secondary">⏭️ Següent punt</a>
     </div>
 </div>
