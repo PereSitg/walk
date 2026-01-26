@@ -58,7 +58,7 @@
         }
 
         #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 12px; border-radius: 15px; font-size: 0.95rem; max-width: 80%; line-height: 1.4; }
+        .msg { padding: 12px; border-radius: 15px; font-size: 0.95rem; max-width: 80%; line-height: 1.4; text-align: left; }
         .bot { background: #e9ecef; align-self: flex-start; border-bottom-left-radius: 2px; }
         .user { background: var(--blau-sitges); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
 
@@ -108,7 +108,7 @@
             <span onclick="toggleChat()" style="cursor:pointer">✕</span>
         </div>
         <div id="chat-messages">
-            <div class="msg bot" id="chat-welcome-msg">Hola! Soc el teu guia personal.</div>
+            <div class="msg bot" id="chat-welcome-msg">Hola!</div>
         </div>
         <div class="chat-controls">
             <button class="icon-btn" onclick="activarVeu()">🎙️</button>
@@ -122,16 +122,39 @@
     <script>
         // --- DICCIONARI MULTI-IDIOMA ---
         const i18n = {
-            ca: { titol: "SitgesWalk", subt: "Configuració", gps: "🌍 Localització GPS", micro: "🎙️ Micròfon", galeria: "🖼️ Galeria", btnAct: "ACTIVAR APP", salut: "Hola! Estàs a Sitges?", btnProp: "📍 QUIN MONUMENT ÉS?", btnRut: "🗺️ RUTES", pend: "PENDENT", ok: "CONCEDIT", welcome: "Benvingut! Estic llesta per guiar-te.", chatInit: "Hola! Puc ajudar-te amb la veu o text.", placeholder: "Escriu aquí...", errorPermis: "Cal acceptar els permisos per continuar." },
-            es: { titol: "SitgesWalk", subt: "Configuración", gps: "🌍 Localización GPS", micro: "🎙️ Micrófono", galeria: "🖼️ Galería", btnAct: "ACTIVAR APP", salut: "¿Hola! Estás en Sitges?", btnProp: "📍 ¿QUÉ MONUMENTO ES?", btnRut: "🗺️ RUTAS", pend: "PENDIENTE", ok: "CONCEDIDO", welcome: "¡Bienvenido! Estoy lista para guiarte.", chatInit: "Hola! Puedo ayudarte con voz o texto.", placeholder: "Escribe aquí...", errorPermis: "Debes aceptar los permisos para continuar." },
-            en: { titol: "SitgesWalk", subt: "Setup", gps: "🌍 GPS Location", micro: "🎙️ Microphone", galeria: "🖼️ Gallery", btnAct: "ACTIVATE APP", salut: "Hi! Are you in Sitges?", btnProp: "📍 WHICH MONUMENT?", btnRut: "🗺️ ROUTES", pend: "PENDING", ok: "GRANTED", welcome: "Welcome! I'm ready to guide you.", chatInit: "Hi! I can help you via voice or text.", placeholder: "Type here...", errorPermis: "All permissions must be granted." }
+            ca: { 
+                titol: "SitgesWalk", subt: "Configuració", gps: "🌍 Localització GPS", micro: "🎙️ Micròfon", galeria: "🖼️ Galeria", 
+                btnAct: "ACTIVAR APP", salut: "Hola! Estàs a Sitges?", btnProp: "📍 QUIN MONUMENT ÉS?", btnRut: "🗺️ RUTES", 
+                pend: "PENDENT", ok: "CONCEDIT", welcome: "Benvingut! Estic llesta per guiar-te.", 
+                chatInit: "Hola! Puc ajudar-te amb la veu o text.", placeholder: "Escriu aquí...",
+                respCapVila: "El Cap de la Vila és el centre històric de Sitges, famós pel seu edifici amb el rellotge i per ser el punt de trobada principal.",
+                respPunta: "La Punta és l'església de Sant Bartomeu i Santa Tecla, la icona més famosa del perfil de Sitges.",
+                respDefault: "Encara estic aprenent detalls sobre aquest lloc. En Pere m'està posant molta informació nova!"
+            },
+            es: { 
+                titol: "SitgesWalk", subt: "Configuración", gps: "🌍 Localización GPS", micro: "🎙️ Micrófono", galeria: "🖼️ Galería", 
+                btnAct: "ACTIVAR APP", salut: "¿Hola! Estás en Sitges?", btnProp: "📍 ¿QUÉ MONUMENTO ES?", btnRut: "🗺️ RUTAS", 
+                pend: "PENDIENTE", ok: "CONCEDIDO", welcome: "¡Bienvenido! Estoy lista para guiarte.", 
+                chatInit: "Hola! Puedo ayudarte con voz o texto.", placeholder: "Escribe aquí...",
+                respCapVila: "El Cap de la Vila es el centro histórico de Sitges, famoso por su edificio con el reloj y por ser el principal punto de encuentro.",
+                respPunta: "La Punta es la iglesia de Sant Bartomeu y Santa Tecla, el icono más famoso del perfil de Sitges.",
+                respDefault: "Aún estoy aprendiendo sobre este lugar. ¡Pere me está dando mucha información nueva!"
+            },
+            en: { 
+                titol: "SitgesWalk", subt: "Setup", gps: "🌍 GPS Location", micro: "🎙️ Microphone", galeria: "🖼️ Gallery", 
+                btnAct: "ACTIVATE APP", salut: "Hi! Are you in Sitges?", btnProp: "📍 WHICH MONUMENT?", btnRut: "🗺️ ROUTES", 
+                pend: "PENDING", ok: "GRANTED", welcome: "Welcome! I'm ready to guide you.", 
+                chatInit: "Hi! I can help you via voice or text.", placeholder: "Type here...",
+                respCapVila: "Cap de la Vila is the historic center of Sitges, famous for its clock building and for being the main meeting point.",
+                respPunta: "La Punta is the church of Sant Bartomeu and Santa Tecla, the most famous icon of the Sitges skyline.",
+                respDefault: "I'm still learning about this place. Pere is giving me a lot of new information!"
+            }
         };
 
         let lang = navigator.language.split('-')[0];
         if (!i18n[lang]) lang = 'en';
         const t = i18n[lang];
 
-        // Aplicar textos en carregar
         window.onload = () => {
             document.getElementById('txt-titol').innerText = t.titol;
             document.getElementById('txt-subtitol').innerText = t.subt;
@@ -154,14 +177,14 @@
             try {
                 if (tipus === 'gps') {
                     await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
-                    actualitzarStatus('st-gps', true);
+                    actualitzarStatus('st-gps');
                     permisos.gps = true;
                 } else if (tipus === 'micro') {
                     await navigator.mediaDevices.getUserMedia({ audio: true });
-                    actualitzarStatus('st-micro', true);
+                    actualitzarStatus('st-micro');
                     permisos.micro = true;
                 } else if (tipus === 'galeria') {
-                    actualitzarStatus('st-galeria', true);
+                    actualitzarStatus('st-galeria');
                     permisos.galeria = true;
                 }
                 verificarFinalitzacio();
@@ -174,7 +197,7 @@
             await demanarPermis('galeria');
         }
 
-        function actualitzarStatus(id, estat) {
+        function actualitzarStatus(id) {
             const el = document.getElementById(id);
             el.innerText = t.ok;
             el.className = "status concedit";
@@ -190,7 +213,7 @@
             }
         }
 
-        // --- VEU I XAT ---
+        // --- VEU I XAT INTEL·LIGENT ---
         function parlar(text) {
             const ut = new SpeechSynthesisUtterance(text);
             ut.lang = lang === 'ca' ? 'ca-ES' : (lang === 'es' ? 'es-ES' : 'en-US');
@@ -199,7 +222,7 @@
 
         function activarVeu() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return alert("Navegador no compatible");
+            if (!SpeechRecognition) return;
             const recognition = new SpeechRecognition();
             recognition.lang = lang === 'ca' ? 'ca-ES' : (lang === 'es' ? 'es-ES' : 'en-US');
             recognition.start();
@@ -217,8 +240,18 @@
             input.value = '';
             
             setTimeout(() => {
-                let r = "Molt bé! Sóc el teu guia.";
-                if (val.toLowerCase().includes("hola")) r = lang === 'ca' ? "Hola! Què vols visitar?" : "¡Hola! ¿Qué quieres visitar?";
+                let r = t.respDefault;
+                const userMsg = val.toLowerCase();
+
+                // Lògica de respostes intel·ligents
+                if (userMsg.includes("cap de la vila")) {
+                    r = t.respCapVila;
+                } else if (userMsg.includes("punta") || userMsg.includes("església") || userMsg.includes("iglesia")) {
+                    r = t.respPunta;
+                } else if (userMsg.includes("hola")) {
+                    r = t.welcome;
+                }
+
                 afegirMsg(r, 'bot');
                 parlar(r);
             }, 600);
