@@ -70,6 +70,48 @@
         .card-content { padding: 25px; }
         .card-content h2 { margin: 0 0 12px 0; color: var(--blau-sitges); }
         .card-content p { line-height: 1.6; font-size: 0.95rem; color: #555; margin-bottom: 20px; }
+
+        /* CHATBOT */
+        #chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        #chat-button {
+            background: var(--blau-sitges);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        #chat-window {
+            display: none;
+            width: 300px;
+            height: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #chat-header { background: var(--blau-sitges); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; }
+        #chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px; border-radius: 12px; font-size: 0.9rem; max-width: 80%; }
+        .bot { background: #eee; align-self: flex-start; }
+        .user { background: var(--blau-sitges); color: white; align-self: flex-end; }
+        #chat-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; }
+        #chat-input { flex: 1; border: none; outline: none; padding: 5px; }
     </style>
 </head>
 <body>
@@ -107,6 +149,18 @@
         </div>
     </div>
 
+    <div id="chat-container">
+        <div id="chat-window">
+            <div id="chat-header"><span>Guia SitgesWalk</span><span onclick="toggleChat()" style="cursor:pointer">✖</span></div>
+            <div id="chat-messages"><div class="msg bot">Hola! Soc el teu guia. Què vols saber sobre Sitges?</div></div>
+            <div id="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Escriu aquí...">
+                <button onclick="enviarMissatge()" style="border:none; background:none; cursor:pointer">🚀</button>
+            </div>
+        </div>
+        <div id="chat-button" onclick="toggleChat()">💬</div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -130,6 +184,41 @@
 
         setTimeout(() => canviarPantalla('menu'), 3000);
 
+        // LÒGICA DEL XAT
+        window.toggleChat = function() {
+            const win = document.getElementById('chat-window');
+            win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
+        };
+
+        window.enviarMissatge = function() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim().toLowerCase();
+            if (!msg) return;
+
+            afegirMissatge(input.value, 'user');
+            input.value = '';
+
+            // Respostes automàtiques (Chatbot bàsic)
+            setTimeout(() => {
+                let resposta = "Ho sento, no t'he entès. Pregunta'm pel 'maricel', l''església' o el 'temps'.";
+                if (msg.includes("maricel")) resposta = "El conjunt de Maricel és una joia noucentista construïda per Charles Deering.";
+                if (msg.includes("església") || msg.includes("punta")) resposta = "L'església de Sant Bartomeu i Santa Tecla és la silueta més famosa de Sitges.";
+                if (msg.includes("hola")) resposta = "Hola! Estic llista per guiar-te per Sitges.";
+                if (msg.includes("temps")) resposta = "A Sitges solem tenir un microclima fantàstic amb 300 dies de sol al any!";
+                
+                afegirMissatge(resposta, 'bot');
+            }, 1000);
+        };
+
+        function afegirMissatge(text, tipus) {
+            const div = document.createElement('div');
+            div.className = `msg ${tipus}`;
+            div.innerText = text;
+            document.getElementById('chat-messages').appendChild(div);
+            document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+        }
+
+        // GPS I RUTES
         function calcularDistancia(lat1, lon1, lat2, lon2) {
             const R = 6371e3; 
             const p1 = lat1 * Math.PI / 180;
@@ -141,12 +230,9 @@
         }
 
         window.localitzarUsuari = function(tipusRuta) {
-            if (!navigator.geolocation) return alert("GPS no disponible");
-
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const uLat = pos.coords.latitude;
                 const uLon = pos.coords.longitude;
-                
                 const querySnapshot = await getDocs(collection(db, "monuments"));
                 let llista = [];
                 querySnapshot.forEach(doc => {
@@ -154,26 +240,4 @@
                     d.distancia = calcularDistancia(uLat, uLon, d.lat, d.lon);
                     llista.push(d);
                 });
-
                 llista.sort((a, b) => a.distancia - b.distancia);
-
-                if (tipusRuta === 'proper') {
-                    mostrarMonument(llista[0]);
-                } else {
-                    alert("Has triat l'opció: " + tipusRuta + ". Estic treballant per traçar la teva millor ruta des d'aquí!");
-                }
-            }, () => alert("Cal acceptar el GPS"));
-        };
-
-        function mostrarMonument(m) {
-            document.getElementById('nom-monument').innerText = m.nom;
-            document.getElementById('desc-monument').innerText = m.descripcio;
-            document.getElementById('foto-monument').innerHTML = m.imatge ? `<img src="${m.imatge}">` : "";
-            document.getElementById('btn-com-arribar').onclick = () => {
-                window.open(`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}`);
-            };
-            canviarPantalla('detall');
-        }
-    </script>
-</body>
-</html>
