@@ -3,110 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sitges Walk</title>
+    <title>SitgesWalk</title>
     <style>
         :root {
             --blau-sitges: #0077cc;
             --blanc: #ffffff;
-            --gris: #f0f2f5;
+            --gris: #f8f9fa;
         }
-        body {
-            font-family: sans-serif;
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: -apple-system, sans-serif;
             background-color: var(--gris);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
         }
+
+        /* PANTALLES */
+        .screen {
+            display: none;
+            height: 100vh;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .active { display: flex; }
+
+        /* BENVINGUDA */
+        #splash {
+            background-color: var(--blau-sitges);
+            color: white;
+        }
+        #splash h1 { font-size: 3rem; margin-bottom: 0; }
+        #splash p { font-weight: 300; opacity: 0.9; }
+
+        /* MENÚ PRINCIPAL */
+        .btn-menu {
+            width: 100%;
+            max-width: 300px;
+            padding: 20px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--blau-sitges);
+            cursor: pointer;
+        }
+
+        /* FITXA MONUMENT */
         .card {
-            background: var(--blanc);
+            background: white;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             max-width: 400px;
-            width: 100%;
             overflow: hidden;
-        }
-        .image-header {
-            background: var(--blau-sitges);
-            height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-        .image-header img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .content { padding: 25px; }
-        h1 { margin: 0 0 10px 0; font-size: 1.5rem; }
-        p { line-height: 1.6; color: #444; }
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin-top: 10px;
-            border-radius: 12px;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-            background-color: var(--blau-sitges);
-            color: white;
         }
     </style>
 </head>
 <body>
 
-<div class="card" id="app-card">
-    <div class="image-header" id="foto-monument">
-        📸 Foto en camí...
+    <div id="splash" class="screen active">
+        <h1>SitgesWalk</h1>
+        <p>by Pere Badia i Lorenz</p>
     </div>
-    <div class="content">
-        <h1 id="nom-monument">Carregant...</h1>
-        <p id="desc-monument">Estem connectant amb Sitges...</p>
-        <a href="#" id="link-maps" class="btn">🗺️ Com arribar-hi</a>
+
+    <div id="menu" class="screen">
+        <h2>Què vols fer?</h2>
+        <button class="btn-menu" onclick="activarGPS()">📍 Quin monument és?</button>
+        <button class="btn-menu">🗺️ Fer una guia turística</button>
     </div>
-</div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <div id="detall" class="screen">
+        <div class="card">
+            <div id="foto-monument" style="height:200px; background:#ddd;"></div>
+            <div style="padding:20px;">
+                <h1 id="nom-monument">...</h1>
+                <p id="desc-monument">...</p>
+                <button class="btn-menu" onclick="tornarMenu()">Tornar al menú</button>
+            </div>
+        </div>
+    </div>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDQwBo1m8hoh1kk2AW7Tex51trJzeDBejU",
-    authDomain: "sitgeswalk.firebaseapp.com",
-    projectId: "sitgeswalk",
-    storageBucket: "sitgeswalk.firebasestorage.app",
-    messagingSenderId: "13367453792",
-    appId: "1:13367453792:web:ee3a8dbae2df721b8f3b05"
-  };
+    <script type="module">
+        // Simulació de transició de benvinguda
+        setTimeout(() => {
+            canviarPantalla('menu');
+        }, 3000);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  async function carregarDades() {
-    const querySnapshot = await getDocs(collection(db, "monuments"));
-    
-    // Agafem el primer monument que trobem a la teva BBDD
-    if (!querySnapshot.empty) {
-        const monument = querySnapshot.docs[0].data();
-        
-        document.getElementById("nom-monument").innerText = monument.nom;
-        document.getElementById("desc-monument").innerText = monument.descripcio;
-        
-        // Si hi ha foto la posem, si no, deixem el text
-        if (monument.imatge) {
-            document.getElementById("foto-monument").innerHTML = `<img src="${monument.imatge}" alt="${monument.nom}">`;
+        window.canviarPantalla = function(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
-        
-        // Configurem el botó de Google Maps
-        document.getElementById("link-maps").href = `https://www.google.com/maps?q=${monument.lat},${monument.lon}`;
-    }
-  }
 
-  carregarDades();
-</script>
+        window.activarGPS = function() {
+            if (!navigator.geolocation) {
+                alert("El teu navegador no suporta GPS.");
+                return;
+            }
 
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    console.log("Latitud:", pos.coords.latitude);
+                    // Aquí connectarem amb Firebase per buscar el més proper
+                    canviarPantalla('detall');
+                    document.getElementById('nom-monument').innerText = "Buscant monument proper...";
+                },
+                (err) => {
+                    alert("Has de permetre el GPS per fer servir aquesta funció.");
+                }
+            );
+        }
+
+        window.tornarMenu = () => canviarPantalla('menu');
+    </script>
 </body>
 </html>
