@@ -15,14 +15,25 @@
 
     <div id="setup" class="screen">
         <div class="container">
-            <div class="card">
-                <div class="info">
-                    <h1>Benvingut</h1>
-                    <p>Per començar la ruta per Sitges, activa el teu GPS.</p>
-                    <button class="btn btn-main" onclick="demanarGPS()">🌍 ACTIVAR GPS</button>
-                    <button class="btn btn-next" id="btn-entrar">ENTRAR</button>
-                </div>
+            <h1>Configuració</h1>
+            <p>Activa els permisos necessaris:</p>
+            
+            <button class="btn btn-all" onclick="activarTot()">✅ ACTIVAR TOTS DE COP</button>
+
+            <div class="permis-box" onclick="demanarPermis('gps')">
+                <span>🌍 Localització GPS</span>
+                <span id="st-gps" class="status">PENDENT</span>
             </div>
+            <div class="permis-box" onclick="demanarPermis('micro')">
+                <span>🎙️ Micròfon (Guia)</span>
+                <span id="st-micro" class="status">PENDENT</span>
+            </div>
+            <div class="permis-box" onclick="demanarPermis('galeria')">
+                <span>🖼️ Galeria de Fotos</span>
+                <span id="st-galeria" class="status">PENDENT</span>
+            </div>
+
+            <button class="btn btn-main" id="btn-entrar" style="margin-top:20px;">ENTRAR A L'APP</button>
         </div>
     </div>
 
@@ -31,9 +42,9 @@
             <div class="card">
                 <div id="mon-imatge" class="image-header">SITGES WALK</div>
                 <div class="info">
-                    <div class="distancia-tag" id="tag-estat">PREPARAT</div>
+                    <div class="distancia-tag">SITGESWALK PRO</div>
                     <h1 id="mon-nom">Busca un monument</h1>
-                    <p id="mon-desc">Apropa't a un punt d'interès i clica el botó.</p>
+                    <p id="mon-desc">Apropa't a un monument i prem el botó.</p>
                     
                     <div id="mon-galeria" class="galeria"></div>
 
@@ -43,7 +54,6 @@
                     </div>
                 </div>
             </div>
-            <p style="text-align:center; font-size:0.8rem; color:#999; margin-top:15px;">SitgesWalk Pro by Pere Badia i Lorenz</p>
         </div>
     </div>
 
@@ -69,18 +79,45 @@
             document.getElementById('setup').classList.add('active');
         }, 4000);
 
-        window.demanarGPS = () => {
-            navigator.geolocation.getCurrentPosition(() => {});
+        window.demanarPermis = async (tipus) => {
+            if (tipus === 'gps') {
+                return new Promise((resolve) => {
+                    navigator.geolocation.getCurrentPosition(() => {
+                        const el = document.getElementById('st-gps');
+                        el.innerText = "CONCEDIT";
+                        el.classList.add('concedit');
+                        resolve();
+                    }, () => resolve());
+                });
+            }
+            if (tipus === 'micro') {
+                try {
+                    await navigator.mediaDevices.getUserMedia({ audio: true });
+                    const el = document.getElementById('st-micro');
+                    el.innerText = "CONCEDIT";
+                    el.classList.add('concedit');
+                } catch (e) {}
+            }
+            if (tipus === 'galeria') {
+                const el = document.getElementById('st-galeria');
+                el.innerText = "CONCEDIT";
+                el.classList.add('concedit');
+            }
+        };
+
+        window.activarTot = async () => {
+            await demanarPermis('gps');
+            await demanarPermis('micro');
+            await demanarPermis('galeria');
         };
 
         document.getElementById('btn-entrar').onclick = () => {
             document.getElementById('setup').classList.remove('active');
             document.getElementById('main').classList.add('active');
-            parlar("Benvingut a la ruta de Pere Badia i Lorenz.");
         };
 
         document.getElementById('btn-localitzar').onclick = async () => {
-            document.getElementById('mon-nom').innerText = "Buscant...";
+            document.getElementById('mon-nom').innerText = "Cercant...";
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const querySnapshot = await getDocs(collection(db, "monuments"));
                 let proper = null; let dMin = Infinity;
@@ -95,7 +132,6 @@
                     monumentTrobat = proper;
                     document.getElementById('mon-nom').innerText = proper.nom;
                     document.getElementById('mon-desc').innerText = proper.descripcio;
-                    document.getElementById('tag-estat').innerText = "MONUMENT DETECTAT";
                     
                     const gal = document.getElementById('mon-galeria');
                     gal.innerHTML = "";
@@ -109,13 +145,8 @@
                             gal.appendChild(img);
                         });
                     }
-                    parlar("Estàs davant de " + proper.nom);
                 }
             });
-        };
-
-        document.getElementById('btn-escoltar').onclick = () => {
-            if (monumentTrobat) parlar(monumentTrobat.descripcio);
         };
 
         function parlar(t) {
@@ -124,6 +155,10 @@
             u.lang = 'ca-ES';
             window.speechSynthesis.speak(u);
         }
+
+        document.getElementById('btn-escoltar').onclick = () => {
+            if (monumentTrobat) parlar(monumentTrobat.descripcio);
+        };
     </script>
 </body>
 </html>
