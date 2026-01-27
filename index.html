@@ -17,7 +17,7 @@
     <div id="setup" class="screen">
         <div class="container">
             <h1 id="txt-config">Configuració</h1>
-            <p id="txt-permisos-desc">Assegura't d'acceptar els avisos del navegador:</p>
+            <p id="txt-permisos-desc">Accepta els permisos per continuar:</p>
             
             <button class="btn btn-all" id="btn-tots" onclick="activarTot()">✅ ACTIVAR TOTS DE COP</button>
 
@@ -46,10 +46,10 @@
             <div class="card">
                 <div class="info">
                     <h1 id="txt-ruta-titol">Quina ruta vols fer?</h1>
-                    <button class="btn btn-next" onclick="comencarApp('30min')">⏱️ Ruta ràpida (30 min)</button>
-                    <button class="btn btn-next" onclick="comencarApp('1h')">🚶 Ruta estàndard (1h)</button>
-                    <button class="btn btn-next" onclick="comencarApp('2h')">🗺️ Ruta extensa (2h)</button>
-                    <button class="btn btn-main" onclick="comencarApp('completa')">⭐ Ruta Completa</button>
+                    <button class="btn btn-next" onclick="comencarApp('30min')" id="btn-r30">⏱️ Ruta ràpida</button>
+                    <button class="btn btn-next" onclick="comencarApp('1h')" id="btn-r1h">🚶 Ruta estàndard</button>
+                    <button class="btn btn-next" onclick="comencarApp('2h')" id="btn-r2h">🗺️ Ruta extensa</button>
+                    <button class="btn btn-main" onclick="comencarApp('completa')" id="btn-rcomp">⭐ Ruta Completa</button>
                 </div>
             </div>
         </div>
@@ -64,11 +64,10 @@
                     <h1 id="mon-nom">Busca un monument</h1>
                     <p id="mon-desc">Fes una foto o usa el GPS per identificar-lo.</p>
                     <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;">
-                    
                     <div id="mon-galeria" class="galeria"></div>
                     <div class="actions">
                         <button class="btn btn-main" id="btn-localitzar" onclick="identificarPerGPS()">📍 PER GPS</button>
-                        <button class="btn btn-main" id="btn-camera-trigger" style="background-color: #6200ea;">📷 FES FOTO</button>
+                        <button class="btn btn-main" id="btn-camera-trigger">📷 FES FOTO</button>
                         <button class="btn btn-next" id="btn-escoltar">🔊 ESCOLTAR HISTÒRIA</button>
                     </div>
                 </div>
@@ -93,51 +92,112 @@
         const db = getFirestore(app);
         let monumentTrobat = null;
 
-        // --- IDIOMA ---
+        // --- DICCIONARI DE TRADUCCIÓ ---
         const idiomes = {
-            'ca': { config: 'Configuració', seguent: 'SEGÜENT', ruta: 'Quina ruta vols fer?', errorGPS: 'Cap monument prop', cercant: 'Buscant monument...', langCode: 'ca-ES' },
-            'es': { config: 'Configuración', seguent: 'SIGUIENTE', ruta: '¿Qué ruta quieres hacer?', errorGPS: 'Ningún monumento cerca', cercant: 'Buscando monumento...', langCode: 'es-ES' },
-            'en': { config: 'Settings', seguent: 'NEXT', ruta: 'Which route?', errorGPS: 'No monument nearby', cercant: 'Searching...', langCode: 'en-GB' }
+            'ca': {
+                config: 'Configuració', desc: 'Accepta els permisos per continuar:',
+                gps: 'Ubicació', cam: 'Càmera', mic: 'Micròfon', gal: 'Galeria',
+                tots: '✅ ACTIVAR TOTS DE COP', seguent: 'SEGÜENT',
+                rutaTitol: 'Quina ruta vols fer?', r30: '⏱️ Ruta ràpida (30 min)', r1h: '🚶 Ruta estàndard (1h)', r2h: '🗺️ Ruta extensa (2h)', rComp: '⭐ Ruta Completa',
+                monTitol: 'Busca un monument', monDesc: 'Fes una foto o usa el GPS per identificar-lo.',
+                btnGps: '📍 PER GPS', btnCam: '📷 FES FOTO', btnVeu: '🔊 ESCOLTAR HISTÒRIA',
+                cercant: 'Buscant monument...', errorGPS: 'Cap monument prop', langCode: 'ca-ES'
+            },
+            'es': {
+                config: 'Configuración', desc: 'Acepta los permisos para continuar:',
+                gps: 'Ubicación', cam: 'Cámara', mic: 'Micrófono', gal: 'Galería',
+                tots: '✅ ACTIVAR TODOS A LA VEZ', seguent: 'SIGUIENTE',
+                rutaTitol: '¿Qué ruta quieres hacer?', r30: '⏱️ Ruta rápida (30 min)', r1h: '🚶 Ruta estándar (1h)', r2h: '🗺️ Ruta extensa (2h)', rComp: '⭐ Ruta Completa',
+                monTitol: 'Busca un monument', monDesc: 'Haz una foto o usa el GPS para identificarlo.',
+                btnGps: '📍 POR GPS', btnCam: '📷 HACER FOTO', btnVeu: '🔊 ESCUCHAR HISTORIA',
+                cercant: 'Buscando monument...', errorGPS: 'Ningún monumento cerca', langCode: 'es-ES'
+            }
         };
-        let lang = navigator.language.split('-')[0];
-        if (!idiomes[lang]) lang = 'en';
-        const textos = idiomes[lang];
 
-        document.getElementById('txt-config').innerText = textos.config;
-        document.getElementById('btn-seguent').innerText = textos.seguent;
-        document.getElementById('txt-ruta-titol').innerText = textos.ruta;
+        let lang = navigator.language.split('-')[0];
+        if (!idiomes[lang]) lang = 'ca'; 
+        const t = idiomes[lang];
+
+        function aplicarTextos() {
+            document.getElementById('txt-config').innerText = t.config;
+            document.getElementById('txt-permisos-desc').innerText = t.desc;
+            document.getElementById('btn-tots').innerText = t.tots;
+            document.getElementById('btn-seguent').innerText = t.seguent;
+            document.getElementById('st-gps').firstChild.textContent = t.gps + ": ";
+            document.getElementById('st-camera').firstChild.textContent = t.cam + ": ";
+            document.getElementById('st-micro').firstChild.textContent = t.mic + ": ";
+            document.getElementById('st-galeria').firstChild.textContent = t.gal + ": ";
+            document.getElementById('txt-ruta-titol').innerText = t.rutaTitol;
+            document.getElementById('btn-r30').innerText = t.r30;
+            document.getElementById('btn-r1h').innerText = t.r1h;
+            document.getElementById('btn-r2h').innerText = t.r2h;
+            document.getElementById('btn-rcomp').innerText = t.rComp;
+            document.getElementById('mon-nom').innerText = t.monTitol;
+            document.getElementById('mon-desc').innerText = t.monDesc;
+            document.getElementById('btn-localitzar').innerText = t.btnGps;
+            document.getElementById('btn-camera-trigger').innerText = t.btnCam;
+            document.getElementById('btn-escoltar').innerText = t.btnVeu;
+        }
+
+        // --- COMPROVACIÓ AUTOMÀTICA DE PERMISOS ---
+        async function autoDetectarPermisos() {
+            if (navigator.permissions) {
+                const pGps = await navigator.permissions.query({ name: 'geolocation' });
+                if (pGps.state === 'granted') marcarOK('gps');
+                
+                // Nota: Càmera i Micro sovint requereixen interacció, però si ja estan granted ho marquem
+                const pCam = await navigator.permissions.query({ name: 'camera' });
+                if (pCam.state === 'granted') marcarOK('camera');
+            }
+        }
+
+        function marcarOK(tipus) {
+            const span = document.querySelector(`#st-${tipus} span`);
+            span.innerText = "OK";
+            span.style.color = "#28a745";
+        }
+
+        aplicarTextos();
+        autoDetectarPermisos();
 
         setTimeout(() => {
             document.getElementById('splash').classList.remove('active');
             document.getElementById('setup').classList.add('active');
-        }, 4000);
+        }, 3000);
 
-        // --- PERMISOS ---
+        // --- GESTIÓ MANUAL ---
         window.demanarPermis = async (tipus) => {
-            const elStatus = document.querySelector(`#st-${tipus} span`);
-            elStatus.innerText = "BUSCANT...";
-            elStatus.style.color = "#ffa500";
-
-            return new Promise((resolve) => {
+            const span = document.querySelector(`#st-${tipus} span`);
+            span.innerText = "...";
+            try {
                 if (tipus === 'gps') {
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => { elStatus.innerText = "CONCEDIT"; elStatus.style.color = "#28a745"; resolve(true); },
-                        () => { elStatus.innerText = "ERROR"; elStatus.style.color = "#dc3545"; resolve(false); },
-                        { enableHighAccuracy: true, timeout: 8000 }
-                    );
+                    navigator.geolocation.getCurrentPosition(() => marcarOK('gps'), () => {});
                 } else if (tipus === 'camera' || tipus === 'micro') {
-                    navigator.mediaDevices.getUserMedia(tipus === 'camera' ? {video:true} : {audio:true})
-                        .then(s => { s.getTracks().forEach(t => t.stop()); elStatus.innerText = "CONCEDIT"; elStatus.style.color = "#28a745"; resolve(true); })
-                        .catch(() => { elStatus.innerText = "DENEGAT"; elStatus.style.color = "#dc3545"; resolve(false); });
-                } else { elStatus.innerText = "CONCEDIT"; elStatus.style.color = "#28a745"; resolve(true); }
-            });
+                    const s = await navigator.mediaDevices.getUserMedia(tipus === 'camera' ? {video:true} : {audio:true});
+                    s.getTracks().forEach(track => track.stop());
+                    marcarOK(tipus);
+                } else { marcarOK('galeria'); }
+            } catch (e) { span.innerText = "ERROR"; }
         };
 
-        window.activarTot = async () => { await demanarPermis('gps'); await demanarPermis('camera'); await demanarPermis('micro'); await demanarPermis('galeria'); };
-        window.anarARuta = () => { document.getElementById('setup').classList.remove('active'); document.getElementById('ruta-select').classList.add('active'); };
-        window.comencarApp = () => { document.getElementById('ruta-select').classList.remove('active'); document.getElementById('main').classList.add('active'); };
+        window.activarTot = async () => {
+            await demanarPermis('gps');
+            await demanarPermis('camera');
+            await demanarPermis('micro');
+            await demanarPermis('galeria');
+        };
 
-        // --- LÒGICA DE RECONEIXEMENT (GPS + FOTO) ---
+        window.anarARuta = () => {
+            document.getElementById('setup').classList.remove('active');
+            document.getElementById('ruta-select').classList.add('active');
+        };
+
+        window.comencarApp = () => {
+            document.getElementById('ruta-select').classList.remove('active');
+            document.getElementById('main').classList.add('active');
+        };
+
+        // --- LÒGICA MONUMENTS (Igual que ahir però amb traduccions) ---
         function calcularDistancia(lat1, lon1, lat2, lon2) {
             const R = 6371;
             const dLat = (lat2-lat1) * Math.PI/180;
@@ -147,11 +207,11 @@
         }
 
         async function buscarMonumentProper() {
-            document.getElementById('mon-nom').innerText = textos.cercant;
+            document.getElementById('mon-nom').innerText = t.cercant;
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const querySnapshot = await getDocs(collection(db, "monuments"));
                 let trobat = null;
-                let minDist = 0.05; // 50 metres
+                let minDist = 0.05; 
 
                 querySnapshot.forEach((doc) => {
                     const d = doc.data();
@@ -166,7 +226,7 @@
                     if(trobat.imatge) document.getElementById('mon-imatge').style.backgroundImage = `url(${trobat.imatge})`;
                     parlar(trobat.descripcio);
                 } else {
-                    document.getElementById('mon-nom').innerText = textos.errorGPS;
+                    document.getElementById('mon-nom').innerText = t.errorGPS;
                 }
             });
         }
@@ -174,15 +234,13 @@
         function parlar(text) {
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
-            u.lang = textos.langCode;
+            u.lang = t.langCode;
             window.speechSynthesis.speak(u);
         }
 
         window.identificarPerGPS = buscarMonumentProper;
-
-        const cameraInput = document.getElementById('camera-input');
-        document.getElementById('btn-camera-trigger').onclick = () => cameraInput.click();
-        cameraInput.onchange = (e) => { if(e.target.files[0]) buscarMonumentProper(); };
+        document.getElementById('btn-camera-trigger').onclick = () => document.getElementById('camera-input').click();
+        document.getElementById('camera-input').onchange = (e) => { if(e.target.files[0]) buscarMonumentProper(); };
         document.getElementById('btn-escoltar').onclick = () => { if(monumentTrobat) parlar(monumentTrobat.descripcio); };
 
     </script>
