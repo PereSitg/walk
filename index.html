@@ -4,42 +4,175 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SitgesWalk Pro - Pere Badia i Lorenz</title>
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0056b3;
+            --accent: #28a745;
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #1c1e21;
+            --text-light: #606770;
+            --radius: 18px;
+            --shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; background-color: var(--bg); color: var(--text); overflow-x: hidden; }
+
+        .screen { 
+            display: none; 
+            min-height: 100vh; 
+            padding: 24px;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .screen.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .container { width: 100%; max-width: 420px; }
+
+        /* Splash Screen */
+        #splash { background: linear-gradient(135deg, #0056b3, #00a1ff); color: white; justify-content: center; }
+        #splash h1 { font-size: 2.8rem; margin-bottom: 0; letter-spacing: -1px; }
+        #splash p { opacity: 0.8; font-weight: 300; }
+
+        /* Loader */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 34px; height: 34px;
+            animation: spin 0.8s linear infinite;
+            margin-top: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Targetes i Info */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            width: 100%;
+            margin-bottom: 24px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .image-header {
+            width: 100%; height: 180px;
+            background-color: #e4e6eb;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .info { padding: 20px; }
+        
+        h1 { font-size: 1.6rem; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px; }
+        .badge {
+            display: inline-block;
+            background: #e7f3ff;
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        /* Mapa i Descripció */
+        #map-container {
+            border-radius: 14px;
+            border: 1px solid #ddd;
+            overflow: hidden;
+            margin: 16px 0;
+            height: 180px;
+        }
+
+        .desc-box {
+            background: #f8f9fa;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary);
+            max-height: 140px;
+            overflow-y: auto;
+        }
+        .desc-box p { margin: 0; line-height: 1.5; font-size: 0.95rem; color: #444; }
+
+        /* Botons */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .btn-main { background: var(--primary); color: white; }
+        .btn-main:active { transform: scale(0.97); }
+        .btn-success { background: var(--accent); color: white; }
+        .btn-outline { background: white; border: 2px solid #e4e6eb; color: var(--text); }
+        .btn-next { background: #f0f2f5; color: var(--text); }
+
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        /* Configura Screen specific */
+        .status-row { font-size: 0.9rem; margin-top: 15px; display: grid; gap: 10px; }
+        .status-row span { font-weight: 700; }
+
+    </style>
 </head>
 <body>
 
     <div id="splash" class="screen active">
         <h1>SitgesWalk</h1>
-        <p>by Pere Badia i Lorenz</p>
+        <p>Premium Tour Guide by Pere Badia</p>
         <div class="loader"></div>
     </div>
 
     <div id="setup" class="screen">
         <div class="container">
-            <h1 id="txt-config">Configuració</h1>
-            <p id="txt-permisos-desc">Accepta els permisos per continuar:</p>
-            <button class="btn btn-all" id="btn-tots" onclick="activarTot()">✅ ACTIVAR TOTS DE COP</button>
-            <div class="permis-row">
-                <button class="btn-permis" id="btn-gps" onclick="demanarPermis('gps')">🌍 GPS</button>
-                <button class="btn-permis" id="btn-camera" onclick="demanarPermis('camera')">📷 Càmera</button>
+            <h1 style="text-align: center; margin-bottom: 30px;">Configuració</h1>
+            <div class="card" style="padding: 20px;">
+                <p style="color: var(--text-light); margin-bottom: 20px;">Per a una experiència guiada professional, necessitem aquests permisos:</p>
+                
+                <button class="btn btn-main" onclick="activarTot()">✨ ACTIVAR-HO TOT</button>
+                
+                <div class="status-row">
+                    <div id="st-gps">📍 Ubicació: <span>PENDENT</span></div>
+                    <div id="st-camera">📷 Càmera: <span>PENDENT</span></div>
+                </div>
             </div>
-            <div id="status-permisos">
-                <p id="st-gps">Ubicació: <span>PENDENT</span></p>
-                <p id="st-camera">Càmera: <span>PENDENT</span></p>
-            </div>
-            <button class="btn btn-main" id="btn-seguent" onclick="anarARuta()" style="margin-top:10px;">SEGÜENT</button>
+            <button class="btn btn-success" id="btn-seguent" onclick="anarARuta()">CONTINUAR ➔</button>
         </div>
     </div>
 
     <div id="ruta-select" class="screen">
         <div class="container">
-            <div class="card">
-                <div class="info">
-                    <h1 id="txt-ruta-titol">Quina ruta vols fer?</h1>
-                    <button class="btn btn-next" onclick="comencarApp('30min')" id="btn-r30">⏱️ Ruta ràpida (30 min)</button>
-                    <button class="btn btn-next" onclick="comencarApp('1h')" id="btn-r1h">🚶 Ruta estàndard (1h)</button>
-                    <button class="btn btn-main" onclick="comencarApp('completa')" id="btn-rcomp">⭐ Ruta Completa</button>
-                </div>
+            <h1 style="text-align: center; margin-bottom: 24px;">Explora Sitges</h1>
+            <div class="card" style="padding: 10px;">
+                <button class="btn btn-next" onclick="comencarApp('30min')">⏱️ Ruta ràpida (30 min)</button>
+                <button class="btn btn-next" onclick="comencarApp('1h')">🚶 Ruta estàndard (1h)</button>
+                <button class="btn btn-main" onclick="comencarApp('completa')">⭐ Ruta Completa</button>
             </div>
         </div>
     </div>
@@ -47,27 +180,32 @@
     <div id="main" class="screen">
         <div class="container">
             <div class="card">
-                <div id="mon-imatge" class="image-header" style="height: 120px;">SITGES WALK</div>
+                <div id="mon-imatge" class="image-header">SITGESWALK</div>
                 <div class="info">
-                    <div id="badge-ruta" class="distancia-tag">SITGESWALK PRO</div>
+                    <span id="badge-ruta" class="badge">SITGESWALK PRO</span>
                     <h1 id="mon-nom">Busca un monument</h1>
 
-                    <div id="map-container" style="width: 100%; height: 160px; border-radius: 10px; overflow: hidden; margin: 10px 0; border: 1px solid #ddd;">
+                    <div id="map-container">
                         <iframe id="mini-mapa" width="100%" height="100%" frameborder="0" src=""></iframe>
                     </div>
                     
-                    <div id="mon-desc-container" style="background: #f9f9f9; padding: 12px; border-radius: 10px; margin-bottom: 10px; text-align: left; max-height: 150px; overflow-y: auto; border-left: 4px solid #6200ea;">
-                        <p id="mon-desc" style="color: #333; line-height: 1.4; margin: 0; font-size: 0.9rem;">Prem el botó GPS o tria una ruta per començar.</p>
+                    <div class="desc-box">
+                        <p id="mon-desc">Tria una ruta per començar el tour guiat.</p>
                     </div>
 
-                    <div class="actions" style="display: grid; gap: 8px;">
-                        <button class="btn btn-main" id="btn-com-arribar" style="background-color: #4285F4; display: none;" onclick="obrirGoogleMaps()">🗺️ COM ARRIBAR (GOOGLE MAPS)</button>
+                    <div class="actions">
+                        <button class="btn btn-main" id="btn-com-arribar" style="background-color: #4285F4; display: none;" onclick="obrirGoogleMaps()">
+                            🗺️ NAVEGACIÓ PAS A PAS
+                        </button>
                         
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-next" id="btn-escoltar" style="flex: 1;">🔊 ESCOLTAR</button>
-                            <button class="btn btn-next" id="btn-seguent-punt" style="flex: 1; background-color: #28a745; display: none;" onclick="seguentPuntRuta()">⏭️ SEGÜENT</button>
+                        <div class="actions-grid">
+                            <button class="btn btn-outline" id="btn-escoltar">🔊 AUDIO</button>
+                            <button class="btn btn-success" id="btn-seguent-punt" style="display: none;" onclick="seguentPuntRuta()">⏭️ SEGÜENT</button>
                         </div>
-                        <button class="btn btn-main" onclick="identificarPerGPS()">📍 RE-LOCALITZAR PER GPS</button>
+                        
+                        <button class="btn btn-outline" onclick="identificarPerGPS()" style="margin-top: 15px; font-size: 0.8rem; border: none;">
+                            📍 RE-SITUAR GPS
+                        </button>
                     </div>
                 </div>
             </div>
@@ -94,21 +232,21 @@
         let llistaPuntsRuta = [];
         let indexPunt = 0;
 
-        // --- GESTIÓ DE RUTES ---
         window.comencarApp = async (tipus) => {
             document.getElementById('ruta-select').classList.remove('active');
             document.getElementById('main').classList.add('active');
             
-            if (tipus === '30min') {
-                document.getElementById('badge-ruta').innerText = "⏱️ RUTA 30 MIN";
-                document.getElementById('btn-seguent-punt').style.display = "block";
-                document.getElementById('btn-com-arribar').style.display = "block";
+            if (tipus === '30min' || tipus === 'completa') {
+                document.getElementById('badge-ruta').innerText = tipus === '30min' ? "⏱️ RUTA 30 MIN" : "⭐ RUTA COMPLETA";
+                document.getElementById('btn-seguent-punt').style.display = "flex";
+                document.getElementById('btn-com-arribar').style.display = "flex";
                 
                 const querySnapshot = await getDocs(collection(db, "monuments"));
                 llistaPuntsRuta = [];
-                querySnapshot.forEach(doc => { if(doc.data().tipic) llistaPuntsRuta.push(doc.data()); });
+                querySnapshot.forEach(doc => { 
+                    if(tipus === 'completa' || doc.data().tipic) llistaPuntsRuta.push(doc.data()); 
+                });
                 
-                // Ordenar per proximitat inicial
                 navigator.geolocation.getCurrentPosition((pos) => {
                     llistaPuntsRuta.sort((a, b) => {
                         const distA = calcularDistancia(pos.coords.latitude, pos.coords.longitude, a.latitud, a.longitud);
@@ -123,7 +261,10 @@
 
         window.seguentPuntRuta = () => {
             indexPunt++;
-            if (indexPunt >= llistaPuntsRuta.length) indexPunt = 0;
+            if (indexPunt >= llistaPuntsRuta.length) {
+                alert("Has arribat al final de la ruta! Esperem que hagis gaudit de Sitges.");
+                indexPunt = 0;
+            }
             mostrarMonument(llistaPuntsRuta[indexPunt]);
         };
 
@@ -132,11 +273,12 @@
             document.getElementById('mon-nom').innerText = m.nom;
             document.getElementById('mon-desc').innerText = m.descripcio;
             
-            // Actualitzar Mini-mapa (OpenStreetMap)
-            const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${m.longitud-0.001},${m.latitud-0.001},${m.longitud+0.001},${m.latitud+0.001}&layer=mapnik&marker=${m.latitud},${m.longitud}`;
+            const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${m.longitud-0.0015},${m.latitud-0.0015},${m.longitud+0.0015},${m.latitud+0.0015}&layer=mapnik&marker=${m.latitud},${m.longitud}`;
             document.getElementById('mini-mapa').src = mapUrl;
 
             if(m.imatge) document.getElementById('mon-imatge').style.backgroundImage = `url(${m.imatge})`;
+            else document.getElementById('mon-imatge').style.background = "linear-gradient(45deg, #0056b3, #00a1ff)";
+            
             parlar(m.descripcio);
         }
 
@@ -146,7 +288,6 @@
             }
         };
 
-        // --- LÒGICA BASE ---
         function calcularDistancia(lat1, lon1, lat2, lon2) {
             const R = 6371;
             const dLat = (lat2-lat1) * Math.PI/180;
@@ -165,6 +306,7 @@
                     if (dist < minDist) { trobat = d; minDist = dist; }
                 });
                 if (trobat) mostrarMonument(trobat);
+                else alert("No s'ha trobat cap monument a prop. Apropa't més al centre històric!");
             });
         };
 
@@ -172,17 +314,17 @@
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
             u.lang = 'ca-ES';
+            u.rate = 0.9;
             window.speechSynthesis.speak(u);
         }
 
-        // --- PERMISOS I INICI ---
         window.demanarPermis = (tipus) => {
             if (tipus === 'gps') navigator.geolocation.getCurrentPosition(() => marcarOK('gps'));
             else marcarOK(tipus);
         };
         function marcarOK(tipus) { 
             const s = document.querySelector(`#st-${tipus} span`); 
-            if(s) { s.innerText = "OK"; s.style.color = "#28a745"; }
+            if(s) { s.innerText = "ACTIU"; s.style.color = "#28a745"; }
         }
         window.activarTot = () => { window.demanarPermis('gps'); marcarOK('camera'); };
         window.anarARuta = () => { 
@@ -193,27 +335,9 @@
         setTimeout(() => {
             document.getElementById('splash').classList.remove('active');
             document.getElementById('setup').classList.add('active');
-        }, 2000);
+        }, 2500);
 
         document.getElementById('btn-escoltar').onclick = () => { if(monumentTrobat) parlar(monumentTrobat.descripcio); };
-        
-        // Funció de càrrega per a la consola
-        window.carregarDades = async () => {
-            const llista = [
-                { id: "sabate", nom: "Pastisseria Sabaté (Can Quildu)", latitud: 41.2353, longitud: 1.8122, tipic: true, descripcio: "Coneguda com Can Quildu o Ca l'Avellaneta. Aquí podràs comprar un muflo, el pastís típic de la mona a Sitges, i també els currutacus per Setmana Santa. Entra i pregunta què són!" },
-                { id: "ajuntament", nom: "L'Ajuntament (Antic Castell)", latitud: 41.2355, longitud: 1.8120, tipic: true, descripcio: "L'edifici actual de l'Ajuntament es va construir sobre l'antic castell de Sitges. Al centre de la plaça hi ha l'estàtua del Doctor Robert." },
-                { id: "major5", nom: "Antic Ajuntament (C. Major 5)", latitud: 41.2350, longitud: 1.8118, tipic: true, descripcio: "Antiga seu de la casa de la vila abans de traslladar-se a l'edifici actual." },
-                { id: "major3", nom: "Torre de les Hores", latitud: 41.2349, longitud: 1.8119, tipic: true, descripcio: "Punt on el rellotge marcava el pols de la vila antiga." },
-                { id: "palau-moro", nom: "Palau del Rei Moro", latitud: 41.2356, longitud: 1.8124, tipic: true, descripcio: "Carrer d'en Bosc, el més antic. Seu dels balls populars en un edifici gòtic civil preciós." },
-                { id: "biblioteca", nom: "Biblioteca Santiago Rusiñol", latitud: 41.2351, longitud: 1.8128, tipic: true, descripcio: "Situada a la Davallada, cor cultural de Sitges." },
-                { id: "quinta", nom: "Quinta Avenida (Corraló)", latitud: 41.2348, longitud: 1.8130, tipic: true, descripcio: "El corraló de la Rectoria que l'Utrillo va batejar amb ironia com la Quinta Avenida." },
-                { id: "fonollar", nom: "Carrer de Fonollar", latitud: 41.2345, longitud: 1.8132, tipic: true, descripcio: "Camí vora el mar que ens porta cap a la Torreta." },
-                { id: "torreta", nom: "La Torreta", latitud: 41.2348, longitud: 1.8138, tipic: true, descripcio: "Oficialment Plaça Vidal i Quadras. El millor mirador cap a Sant Sebastià." },
-                { id: "vall", nom: "El Vall", latitud: 41.2355, longitud: 1.8130, tipic: true, descripcio: "Antic fossat de la muralla que tancava la vila medieval." }
-            ];
-            for (const m of llista) { await setDoc(doc(db, "monuments", m.id), m); }
-            alert("Dades carregades!");
-        };
     </script>
 </body>
 </html>
