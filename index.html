@@ -12,166 +12,77 @@
             --bg: #f0f2f5;
             --card: #ffffff;
             --text: #1c1e21;
-            --text-light: #606770;
             --radius: 18px;
             --shadow: 0 8px 24px rgba(0,0,0,0.12);
         }
 
-        * { box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { margin: 0; background-color: var(--bg); color: var(--text); overflow-x: hidden; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { margin: 0; background-color: var(--bg); color: var(--text); }
 
-        .screen { 
-            display: none; 
-            min-height: 100vh; 
-            padding: 24px;
-            flex-direction: column;
-            align-items: center;
-            animation: fadeIn 0.4s ease-out;
-        }
+        .screen { display: none; min-height: 100vh; padding: 24px; flex-direction: column; align-items: center; animation: fadeIn 0.4s ease; }
         .screen.active { display: flex; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .container { width: 100%; max-width: 420px; }
-
-        /* Splash Screen */
-        #splash { background: linear-gradient(135deg, #0056b3, #00a1ff); color: white; justify-content: center; }
-        #splash h1 { font-size: 2.8rem; margin-bottom: 0; letter-spacing: -1px; }
-        #splash p { opacity: 0.8; font-weight: 300; }
-
-        /* Loader */
-        .loader {
-            border: 3px solid rgba(255,255,255,0.2);
-            border-top: 3px solid white;
-            border-radius: 50%;
-            width: 34px; height: 34px;
-            animation: spin 0.8s linear infinite;
-            margin-top: 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Targetes i Info */
-        .card {
-            background: var(--card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            width: 100%;
-            margin-bottom: 24px;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .image-header {
-            width: 100%; height: 180px;
-            background-color: #e4e6eb;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: flex-end;
-            padding: 20px;
-            color: white;
-            font-weight: 700;
-            font-size: 1.2rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .info { padding: 20px; }
-        
-        h1 { font-size: 1.6rem; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px; }
-        .badge {
-            display: inline-block;
-            background: #e7f3ff;
-            color: var(--primary);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-        }
-
-        /* Mapa i Descripció */
-        #map-container {
-            border-radius: 14px;
-            border: 1px solid #ddd;
-            overflow: hidden;
-            margin: 16px 0;
-            height: 180px;
-        }
-
-        .desc-box {
-            background: #f8f9fa;
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 20px;
-            border-left: 5px solid var(--primary);
-            max-height: 140px;
-            overflow-y: auto;
-        }
-        .desc-box p { margin: 0; line-height: 1.5; font-size: 0.95rem; color: #444; }
+        .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; width: 100%; margin-bottom: 20px; }
 
         /* Botons */
-        .btn {
-            width: 100%;
-            padding: 16px;
-            border-radius: 14px;
-            border: none;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
+        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
         .btn-main { background: var(--primary); color: white; }
-        .btn-main:active { transform: scale(0.97); }
         .btn-success { background: var(--accent); color: white; }
-        .btn-outline { background: white; border: 2px solid #e4e6eb; color: var(--text); }
-        .btn-next { background: #f0f2f5; color: var(--text); }
+        .btn-outline { background: white; border: 2px solid #e4e6eb; color: var(--text); font-size: 0.9rem; }
+        
+        /* Graella de permisos */
+        .permisos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .status-box { font-size: 0.8rem; background: #f8f9fa; padding: 10px; border-radius: 10px; margin-top: 10px; }
+        .status-item { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .status-item span { font-weight: 700; color: #999; }
+        .ok { color: var(--accent) !important; }
 
-        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-        /* Configura Screen specific */
-        .status-row { font-size: 0.9rem; margin-top: 15px; display: grid; gap: 10px; }
-        .status-row span { font-weight: 700; }
-
+        /* Pantalla Main */
+        .image-header { width: 100%; height: 160px; background-size: cover; background-position: center; border-radius: 14px; margin-bottom: 15px; background-color: #ddd; }
+        #map-container { border-radius: 14px; overflow: hidden; height: 160px; border: 1px solid #ddd; margin: 10px 0; }
+        .desc-box { background: #f8f9fa; padding: 15px; border-radius: 12px; border-left: 5px solid var(--primary); font-size: 0.9rem; max-height: 120px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-    <div id="splash" class="screen active">
+    <div id="splash" class="screen active" style="background: var(--primary); color: white; justify-content: center;">
         <h1>SitgesWalk</h1>
-        <p>Premium Tour Guide by Pere Badia</p>
-        <div class="loader"></div>
+        <p>by Pere Badia i Lorenz</p>
     </div>
 
     <div id="setup" class="screen">
         <div class="container">
-            <h1 style="text-align: center; margin-bottom: 30px;">Configuració</h1>
-            <div class="card" style="padding: 20px;">
-                <p style="color: var(--text-light); margin-bottom: 20px;">Per a una experiència guiada professional, necessitem aquests permisos:</p>
-                
-                <button class="btn btn-main" onclick="activarTot()">✨ ACTIVAR-HO TOT</button>
-                
-                <div class="status-row">
-                    <div id="st-gps">📍 Ubicació: <span>PENDENT</span></div>
-                    <div id="st-camera">📷 Càmera: <span>PENDENT</span></div>
-                </div>
+            <h1 style="text-align: center;">Configuració</h1>
+            <p style="text-align: center; color: #666;">Tria quins serveis vols activar:</p>
+            
+            <button class="btn btn-success" onclick="activarTot()">✅ ACTIVAR-HO TOT DE COP</button>
+
+            <div class="permisos-grid">
+                <button class="btn btn-outline" onclick="demanarPermis('gps')">🌍 GPS</button>
+                <button class="btn btn-outline" onclick="demanarPermis('camera')">📷 Càmera</button>
+                <button class="btn btn-outline" onclick="demanarPermis('micro')">🎙️ Micro</button>
+                <button class="btn btn-outline" onclick="demanarPermis('galeria')">🖼️ Galeria</button>
             </div>
-            <button class="btn btn-success" id="btn-seguent" onclick="anarARuta()">CONTINUAR ➔</button>
+
+            <div class="card status-box">
+                <div class="status-item" id="st-gps">Ubicació: <span>PENDENT</span></div>
+                <div class="status-item" id="st-camera">Càmera: <span>PENDENT</span></div>
+                <div class="status-item" id="st-micro">Micròfon: <span>PENDENT</span></div>
+                <div class="status-item" id="st-galeria">Galeria: <span>PENDENT</span></div>
+            </div>
+
+            <button class="btn btn-main" onclick="anarARuta()" style="margin-top: 15px;">CONTINUAR ➔</button>
         </div>
     </div>
 
     <div id="ruta-select" class="screen">
         <div class="container">
-            <h1 style="text-align: center; margin-bottom: 24px;">Explora Sitges</h1>
-            <div class="card" style="padding: 10px;">
-                <button class="btn btn-next" onclick="comencarApp('30min')">⏱️ Ruta ràpida (30 min)</button>
-                <button class="btn btn-next" onclick="comencarApp('1h')">🚶 Ruta estàndard (1h)</button>
+            <h1 style="text-align: center;">Quina ruta vols fer?</h1>
+            <div class="card">
+                <button class="btn btn-outline" onclick="comencarApp('30min')">⏱️ Ruta ràpida (30 min)</button>
+                <button class="btn btn-outline" onclick="comencarApp('1h')">🚶 Ruta estàndard (1h)</button>
                 <button class="btn btn-main" onclick="comencarApp('completa')">⭐ Ruta Completa</button>
             </div>
         </div>
@@ -180,32 +91,23 @@
     <div id="main" class="screen">
         <div class="container">
             <div class="card">
-                <div id="mon-imatge" class="image-header">SITGESWALK</div>
-                <div class="info">
-                    <span id="badge-ruta" class="badge">SITGESWALK PRO</span>
-                    <h1 id="mon-nom">Busca un monument</h1>
+                <div id="mon-imatge" class="image-header"></div>
+                <span id="badge-ruta" style="font-size: 0.7rem; font-weight: 700; color: var(--primary); text-transform: uppercase;">SITGESWALK PRO</span>
+                <h1 id="mon-nom" style="margin: 5px 0;">Busca un monument</h1>
+                
+                <div id="map-container">
+                    <iframe id="mini-mapa" width="100%" height="100%" frameborder="0"></iframe>
+                </div>
 
-                    <div id="map-container">
-                        <iframe id="mini-mapa" width="100%" height="100%" frameborder="0" src=""></iframe>
-                    </div>
-                    
-                    <div class="desc-box">
-                        <p id="mon-desc">Tria una ruta per començar el tour guiat.</p>
-                    </div>
+                <div class="desc-box">
+                    <p id="mon-desc">Carregant informació...</p>
+                </div>
 
-                    <div class="actions">
-                        <button class="btn btn-main" id="btn-com-arribar" style="background-color: #4285F4; display: none;" onclick="obrirGoogleMaps()">
-                            🗺️ NAVEGACIÓ PAS A PAS
-                        </button>
-                        
-                        <div class="actions-grid">
-                            <button class="btn btn-outline" id="btn-escoltar">🔊 AUDIO</button>
-                            <button class="btn btn-success" id="btn-seguent-punt" style="display: none;" onclick="seguentPuntRuta()">⏭️ SEGÜENT</button>
-                        </div>
-                        
-                        <button class="btn btn-outline" onclick="identificarPerGPS()" style="margin-top: 15px; font-size: 0.8rem; border: none;">
-                            📍 RE-SITUAR GPS
-                        </button>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-main" id="btn-com-arribar" style="background: #4285F4; display: none;" onclick="obrirGoogleMaps()">🗺️ GOOGLE MAPS</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline" id="btn-escoltar" style="flex: 1;">🔊 AUDIO</button>
+                        <button class="btn btn-success" id="btn-seguent-punt" style="flex: 1; display: none;" onclick="seguentPuntRuta()">⏭️ SEGÜENT</button>
                     </div>
                 </div>
             </div>
@@ -213,6 +115,10 @@
     </div>
 
     <script type="module">
+        // --- COPIA AQUÍ EL TEU CODI DE FIREBASE I LÒGICA ---
+        // Recorda mantenir les funcions: activarTot(), demanarPermis(tipus), mostrarMonument(m), etc.
+        // He adaptat la funció marcarOK perquè funcioni amb els nous IDs.
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -232,112 +138,69 @@
         let llistaPuntsRuta = [];
         let indexPunt = 0;
 
+        // Gestió de permisos individualitzada
+        window.demanarPermis = async (tipus) => {
+            const span = document.querySelector(`#st-${tipus} span`);
+            span.innerText = "DEMANANT...";
+            try {
+                if (tipus === 'gps') {
+                    navigator.geolocation.getCurrentPosition(() => marcarOK('gps'), () => span.innerText = "DENEGAT");
+                } else if (tipus === 'camera' || tipus === 'micro') {
+                    const s = await navigator.mediaDevices.getUserMedia(tipus === 'camera' ? {video:true} : {audio:true});
+                    s.getTracks().forEach(t => t.stop());
+                    marcarOK(tipus);
+                } else {
+                    marcarOK('galeria'); // Simulat
+                }
+            } catch (e) { span.innerText = "ERROR"; }
+        };
+
+        function marcarOK(tipus) {
+            const span = document.querySelector(`#st-${tipus} span`);
+            if(span) { span.innerText = "ACTIU"; span.className = "ok"; }
+        }
+
+        window.activarTot = async () => {
+            await demanarPermis('gps');
+            await demanarPermis('camera');
+            await demanarPermis('micro');
+            await demanarPermis('galeria');
+        };
+
+        // Lògica de navegació (com abans)
+        window.anarARuta = () => { document.getElementById('setup').classList.remove('active'); document.getElementById('ruta-select').classList.add('active'); };
+        
         window.comencarApp = async (tipus) => {
             document.getElementById('ruta-select').classList.remove('active');
             document.getElementById('main').classList.add('active');
-            
-            if (tipus === '30min' || tipus === 'completa') {
-                document.getElementById('badge-ruta').innerText = tipus === '30min' ? "⏱️ RUTA 30 MIN" : "⭐ RUTA COMPLETA";
+            const querySnapshot = await getDocs(collection(db, "monuments"));
+            llistaPuntsRuta = [];
+            querySnapshot.forEach(doc => llistaPuntsRuta.push(doc.data()));
+            if(llistaPuntsRuta.length > 0) {
                 document.getElementById('btn-seguent-punt').style.display = "flex";
                 document.getElementById('btn-com-arribar').style.display = "flex";
-                
-                const querySnapshot = await getDocs(collection(db, "monuments"));
-                llistaPuntsRuta = [];
-                querySnapshot.forEach(doc => { 
-                    if(tipus === 'completa' || doc.data().tipic) llistaPuntsRuta.push(doc.data()); 
-                });
-                
-                navigator.geolocation.getCurrentPosition((pos) => {
-                    llistaPuntsRuta.sort((a, b) => {
-                        const distA = calcularDistancia(pos.coords.latitude, pos.coords.longitude, a.latitud, a.longitud);
-                        const distB = calcularDistancia(pos.coords.latitude, pos.coords.longitude, b.latitud, b.longitud);
-                        return distA - distB;
-                    });
-                    indexPunt = 0;
-                    mostrarMonument(llistaPuntsRuta[0]);
-                });
+                mostrarMonument(llistaPuntsRuta[0]);
             }
-        };
-
-        window.seguentPuntRuta = () => {
-            indexPunt++;
-            if (indexPunt >= llistaPuntsRuta.length) {
-                alert("Has arribat al final de la ruta! Esperem que hagis gaudit de Sitges.");
-                indexPunt = 0;
-            }
-            mostrarMonument(llistaPuntsRuta[indexPunt]);
         };
 
         function mostrarMonument(m) {
             monumentTrobat = m;
             document.getElementById('mon-nom').innerText = m.nom;
             document.getElementById('mon-desc').innerText = m.descripcio;
-            
-            const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${m.longitud-0.0015},${m.latitud-0.0015},${m.longitud+0.0015},${m.latitud+0.0015}&layer=mapnik&marker=${m.latitud},${m.longitud}`;
-            document.getElementById('mini-mapa').src = mapUrl;
-
+            document.getElementById('mini-mapa').src = `https://www.openstreetmap.org/export/embed.html?bbox=${m.longitud-0.001},${m.latitud-0.001},${m.longitud+0.001},${m.latitud+0.001}&layer=mapnik&marker=${m.latitud},${m.longitud}`;
             if(m.imatge) document.getElementById('mon-imatge').style.backgroundImage = `url(${m.imatge})`;
-            else document.getElementById('mon-imatge').style.background = "linear-gradient(45deg, #0056b3, #00a1ff)";
-            
-            parlar(m.descripcio);
         }
 
         window.obrirGoogleMaps = () => {
-            if (monumentTrobat) {
-                window.open(`https://www.google.com/maps/dir/?api=1&destination=${monumentTrobat.latitud},${monumentTrobat.longitud}&travelmode=walking`, '_blank');
-            }
+            if (monumentTrobat) window.open(`https://www.google.com/maps/dir/?api=1&destination=${monumentTrobat.latitud},${monumentTrobat.longitud}&travelmode=walking`, '_blank');
         };
 
-        function calcularDistancia(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2-lat1) * Math.PI/180;
-            const dLon = (lon2-lon1) * Math.PI/180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-        }
-
-        window.identificarPerGPS = async () => {
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const querySnapshot = await getDocs(collection(db, "monuments"));
-                let trobat = null; let minDist = 0.05;
-                querySnapshot.forEach((doc) => {
-                    const d = doc.data();
-                    const dist = calcularDistancia(pos.coords.latitude, pos.coords.longitude, d.latitud, d.longitud);
-                    if (dist < minDist) { trobat = d; minDist = dist; }
-                });
-                if (trobat) mostrarMonument(trobat);
-                else alert("No s'ha trobat cap monument a prop. Apropa't més al centre històric!");
-            });
+        window.seguentPuntRuta = () => {
+            indexPunt = (indexPunt + 1) % llistaPuntsRuta.length;
+            mostrarMonument(llistaPuntsRuta[indexPunt]);
         };
 
-        function parlar(text) {
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(text);
-            u.lang = 'ca-ES';
-            u.rate = 0.9;
-            window.speechSynthesis.speak(u);
-        }
-
-        window.demanarPermis = (tipus) => {
-            if (tipus === 'gps') navigator.geolocation.getCurrentPosition(() => marcarOK('gps'));
-            else marcarOK(tipus);
-        };
-        function marcarOK(tipus) { 
-            const s = document.querySelector(`#st-${tipus} span`); 
-            if(s) { s.innerText = "ACTIU"; s.style.color = "#28a745"; }
-        }
-        window.activarTot = () => { window.demanarPermis('gps'); marcarOK('camera'); };
-        window.anarARuta = () => { 
-            document.getElementById('setup').classList.remove('active'); 
-            document.getElementById('ruta-select').classList.add('active'); 
-        };
-
-        setTimeout(() => {
-            document.getElementById('splash').classList.remove('active');
-            document.getElementById('setup').classList.add('active');
-        }, 2500);
-
-        document.getElementById('btn-escoltar').onclick = () => { if(monumentTrobat) parlar(monumentTrobat.descripcio); };
+        setTimeout(() => { document.getElementById('splash').classList.remove('active'); document.getElementById('setup').classList.add('active'); }, 2000);
     </script>
 </body>
 </html>
