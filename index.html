@@ -46,9 +46,9 @@
             <div class="card">
                 <div class="info">
                     <h1 id="txt-ruta-titol">Quina ruta vols fer?</h1>
-                    <button class="btn btn-next" onclick="comencarApp('30min')" id="btn-r30">⏱️ Ruta ràpida</button>
-                    <button class="btn btn-next" onclick="comencarApp('1h')" id="btn-r1h">🚶 Ruta estàndard</button>
-                    <button class="btn btn-next" onclick="comencarApp('2h')" id="btn-r2h">🗺️ Ruta extensa</button>
+                    <button class="btn btn-next" onclick="comencarApp('30min')" id="btn-r30">⏱️ Ruta ràpida (30 min)</button>
+                    <button class="btn btn-next" onclick="comencarApp('1h')" id="btn-r1h">🚶 Ruta estàndard (1h)</button>
+                    <button class="btn btn-next" onclick="comencarApp('2h')" id="btn-r2h">🗺️ Ruta extensa (2h)</button>
                     <button class="btn btn-main" onclick="comencarApp('completa')" id="btn-rcomp">⭐ Ruta Completa</button>
                 </div>
             </div>
@@ -77,7 +77,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDQwBo1m8hoh1kk2AW7Tex51trJzeDBejU",
@@ -92,7 +92,6 @@
         const db = getFirestore(app);
         let monumentTrobat = null;
 
-        // --- DICCIONARI DE TRADUCCIÓ ---
         const idiomes = {
             'ca': {
                 config: 'Configuració', desc: 'Accepta els permisos per continuar:',
@@ -139,13 +138,10 @@
             document.getElementById('btn-escoltar').innerText = t.btnVeu;
         }
 
-        // --- COMPROVACIÓ AUTOMÀTICA DE PERMISOS ---
         async function autoDetectarPermisos() {
             if (navigator.permissions) {
                 const pGps = await navigator.permissions.query({ name: 'geolocation' });
                 if (pGps.state === 'granted') marcarOK('gps');
-                
-                // Nota: Càmera i Micro sovint requereixen interacció, però si ja estan granted ho marquem
                 const pCam = await navigator.permissions.query({ name: 'camera' });
                 if (pCam.state === 'granted') marcarOK('camera');
             }
@@ -153,8 +149,10 @@
 
         function marcarOK(tipus) {
             const span = document.querySelector(`#st-${tipus} span`);
-            span.innerText = "OK";
-            span.style.color = "#28a745";
+            if(span) {
+                span.innerText = "OK";
+                span.style.color = "#28a745";
+            }
         }
 
         aplicarTextos();
@@ -165,7 +163,6 @@
             document.getElementById('setup').classList.add('active');
         }, 3000);
 
-        // --- GESTIÓ MANUAL ---
         window.demanarPermis = async (tipus) => {
             const span = document.querySelector(`#st-${tipus} span`);
             span.innerText = "...";
@@ -181,10 +178,8 @@
         };
 
         window.activarTot = async () => {
-            await demanarPermis('gps');
-            await demanarPermis('camera');
-            await demanarPermis('micro');
-            await demanarPermis('galeria');
+            await demanarPermis('gps'); await demanarPermis('camera');
+            await demanarPermis('micro'); await demanarPermis('galeria');
         };
 
         window.anarARuta = () => {
@@ -192,12 +187,12 @@
             document.getElementById('ruta-select').classList.add('active');
         };
 
-        window.comencarApp = () => {
+        window.comencarApp = (ruta) => {
             document.getElementById('ruta-select').classList.remove('active');
             document.getElementById('main').classList.add('active');
+            if(ruta === '30min') identificarPerGPS(true);
         };
 
-        // --- LÒGICA MONUMENTS (Igual que ahir però amb traduccions) ---
         function calcularDistancia(lat1, lon1, lat2, lon2) {
             const R = 6371;
             const dLat = (lat2-lat1) * Math.PI/180;
@@ -206,20 +201,26 @@
             return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
 
-        async function buscarMonumentProper() {
+        async function buscarMonumentProper(esRuta30 = false) {
             document.getElementById('mon-nom').innerText = t.cercant;
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const querySnapshot = await getDocs(collection(db, "monuments"));
-                let trobat = null;
-                let minDist = 0.05; 
-
+                let monumentsPossibles = [];
+                
                 querySnapshot.forEach((doc) => {
                     const d = doc.data();
                     const dist = calcularDistancia(pos.coords.latitude, pos.coords.longitude, d.latitud, d.longitud);
-                    if (dist < minDist) { trobat = d; minDist = dist; }
+                    if (esRuta30) {
+                        if (d.tipic) monumentsPossibles.push({ ...d, dist });
+                    } else {
+                        if (dist < 0.05) monumentsPossibles.push({ ...d, dist });
+                    }
                 });
 
-                if (trobat) {
+                monumentsPossibles.sort((a, b) => a.dist - b.dist);
+
+                if (monumentsPossibles.length > 0) {
+                    const trobat = monumentsPossibles[0];
                     monumentTrobat = trobat;
                     document.getElementById('mon-nom').innerText = trobat.nom;
                     document.getElementById('mon-desc').innerText = trobat.descripcio;
@@ -243,6 +244,23 @@
         document.getElementById('camera-input').onchange = (e) => { if(e.target.files[0]) buscarMonumentProper(); };
         document.getElementById('btn-escoltar').onclick = () => { if(monumentTrobat) parlar(monumentTrobat.descripcio); };
 
+        // --- FUNCIO DE CARREGA (Executar a la consola: carregarDades()) ---
+        window.carregarDades = async () => {
+            const llista = [
+                { id: "sabate", nom: "Pastisseria Sabaté (Can Quildu)", latitud: 41.2353, longitud: 1.8122, tipic: true, descripcio: "Coneguda com Can Quildu o Ca l'Avellaneta. Aquí podràs comprar un muflo, el pastís típic de la mona a Sitges, i també els currutacus per Setmana Santa. Entra i pregunta què són!" },
+                { id: "ajuntament", nom: "L'Ajuntament (Antic Castell)", latitud: 41.2355, longitud: 1.8120, tipic: true, descripcio: "L'edifici actual de l'Ajuntament es va construir sobre l'antic castell de Sitges. Al centre de la plaça hi ha l'estàtua del Doctor Robert." },
+                { id: "major5", nom: "Carrer Major 5 (Antic Ajuntament)", latitud: 41.2350, longitud: 1.8118, tipic: true, descripcio: "En aquest edifici hi va haver l'antic Ajuntament de la vila abans de traslladar-se a la plaça actual." },
+                { id: "major3", nom: "Torre de les Hores", latitud: 41.2349, longitud: 1.8119, tipic: true, descripcio: "Situada al carrer Major 3, és un punt històric on el rellotge marcava el temps dels sitgetans." },
+                { id: "palau-moro", nom: "Palau del Rei Moro", latitud: 41.2356, longitud: 1.8124, tipic: true, descripcio: "Situat al carrer d'en Bosc, el carrer més antic de Sitges. És un edifici gòtic civil, seu de l'Agrupació de Balls Populars." },
+                { id: "biblioteca", nom: "La Davallada i Biblioteca", latitud: 41.2351, longitud: 1.8128, tipic: true, descripcio: "Al principi de la Davallada trobem la Biblioteca Santiago Rusiñol, un centre cultural clau de la vila." },
+                { id: "quinta", nom: "Corraló de la Rectoria", latitud: 41.2348, longitud: 1.8130, tipic: true, descripcio: "Batejat per l'Utrillo com la 'Quinta Avenida', aquest estret passadís connecta el cor de la vila amb els museus." },
+                { id: "fonollar", nom: "Carrer de Fonollar", latitud: 41.2345, longitud: 1.8132, tipic: true, descripcio: "Baixa tot aquest carrer vorejant el Maricel per arribar a la zona de la Torreta." },
+                { id: "torreta", nom: "La Torreta", latitud: 41.2348, longitud: 1.8138, tipic: true, descripcio: "Plaça de Vidal i Quadras, coneguda pels sitgetans com la Torreta. Un mirador espectacular cap a la platja de Sant Sebastià." },
+                { id: "vall", nom: "Carrer del Vall", latitud: 41.2355, longitud: 1.8130, tipic: true, descripcio: "Aquest carrer segueix l'antic traçat de la muralla medieval de Sitges." }
+            ];
+            for (const m of llista) { await setDoc(doc(db, "monuments", m.id), m); }
+            alert("Dades de Sitges carregades!");
+        };
     </script>
 </body>
 </html>
