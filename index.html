@@ -10,57 +10,57 @@
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; position: fixed; }
 
-        .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; position: relative; }
+        .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; position: relative; background: var(--bg); }
         .screen.active { display: flex; }
 
-        /* HEADER AMB BOTÓ FINALITZAR */
+        /* CAPÇALERA */
         .header-info {
-            position: absolute; top: 0; left: 0; right: 0;
             background: var(--primary); color: white;
-            padding: 12px 15px; text-align: center; z-index: 100;
+            padding: 10px 15px; text-align: center; z-index: 100;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             display: flex; justify-content: space-between; align-items: center;
+            height: 70px; width: 100%;
         }
-        .header-text { flex-grow: 1; text-align: center; margin-left: 40px; } /* Centrat compensat */
-        .header-info h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; }
-        .header-info p { margin: 2px 0 0; font-size: 0.8rem; opacity: 0.9; }
+        .header-text { flex-grow: 1; }
+        .header-info h1 { margin: 0; font-size: 1.1rem; }
+        .header-info p { margin: 2px 0 0; font-size: 0.75rem; opacity: 0.9; }
         
+        /* BOTÓ FINALITZAR */
         .btn-end { 
-            background: var(--accent); color: white; border: none; 
-            padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; 
-            font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background: var(--accent); color: white; border: 2px solid white; 
+            padding: 6px 10px; border-radius: 8px; font-size: 0.7rem; 
+            font-weight: 800; cursor: pointer; min-width: 85px;
         }
 
         /* MAPA */
         #map-fullscreen { flex: 1; width: 100%; height: 100%; border: none; }
 
-        /* BOTÓ CHATBOT */
+        /* BOTÓ CHATBOT FLOTANT (Sempre visible) */
         #chat-toggle-btn {
-            position: absolute; bottom: 45px; right: 25px;
+            position: fixed; bottom: 45px; right: 25px;
             width: 65px; height: 65px; border-radius: 50%;
             background: var(--primary); color: white;
             border: 3px solid white; font-size: 1.8rem; cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4); z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4); z-index: 2000;
             display: flex; align-items: center; justify-content: center;
         }
 
         /* PANELL CHATBOT */
         #global-chatbot {
-            position: absolute; bottom: 0; left: 0; right: 0;
+            position: fixed; bottom: 0; left: 0; right: 0;
             background: white; border-radius: 25px 25px 0 0;
-            padding: 20px; z-index: 1100; transform: translateY(105%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px; z-index: 2100; transform: translateY(105%);
+            transition: transform 0.3s ease-in-out;
             box-shadow: 0 -10px 30px rgba(0,0,0,0.3); height: 320px;
         }
         #global-chatbot.open { transform: translateY(0); }
         
-        #chat-log { height: 150px; overflow-y: auto; font-size: 0.9rem; background: #f1f3f5; padding: 12px; border-radius: 12px; margin-bottom: 12px; }
+        #chat-log { height: 140px; overflow-y: auto; font-size: 0.9rem; background: #f1f3f5; padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #ddd; }
         .chat-input-area { display: flex; gap: 8px; }
-        #chat-input { flex: 1; padding: 14px; border-radius: 12px; border: 2px solid #eee; }
+        #chat-input { flex: 1; padding: 12px; border-radius: 10px; border: 2px solid #eee; }
 
-        /* ALTRES PANTALLES */
-        #splash, #ruta-select { align-items: center; justify-content: center; padding: 30px; background: var(--bg); text-align: center; }
-        #splash { background: linear-gradient(135deg, #0056b3, #007bff); color: white; }
+        #splash { background: var(--primary); color: white; justify-content: center; align-items: center; }
+        #ruta-select { padding: 30px; justify-content: center; align-items: center; }
         .btn { width: 100%; padding: 16px; border-radius: 15px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-bottom: 12px; }
         .btn-main { background: var(--primary); color: white; }
     </style>
@@ -73,9 +73,9 @@
     </div>
 
     <div id="ruta-select" class="screen">
-        <div style="width: 100%; max-width: 400px;">
+        <div style="width: 100%; max-width: 400px; text-align: center;">
             <h2 style="color: var(--primary);">Hola Pere!</h2>
-            <p>Tria el temps de la teva ruta:</p>
+            <p>Tria una ruta per començar:</p>
             <button class="btn btn-main" onclick="comencarApp('30 minuts')">⏱️ 30 minuts</button>
             <button class="btn btn-main" onclick="comencarApp('1 hora')">🚶 1 hora</button>
             <button class="btn btn-main" onclick="comencarApp('Completa')">⭐ Ruta Completa</button>
@@ -84,54 +84,62 @@
 
     <div id="main" class="screen">
         <div class="header-info">
-            <div style="width: 40px;"></div> <div class="header-text">
+            <div style="width: 85px;"></div>
+            <div class="header-text">
                 <h1>SitgesWalk</h1>
                 <p id="current-street">Detectant carrer...</p>
             </div>
             <button class="btn-end" onclick="finalitzarRuta()">FINALITZAR</button>
         </div>
-
         <iframe id="map-fullscreen" src="" allow="geolocation"></iframe>
+    </div>
 
-        <button id="chat-toggle-btn" onclick="toggleChat()">🤖</button>
+    <button id="chat-toggle-btn" onclick="toggleChat()">🤖</button>
 
-        <div id="global-chatbot">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <strong style="color: var(--primary);">Guia de Sitges</strong>
-                <button onclick="toggleChat()" style="border:none; background:#eee; padding: 5px 10px; border-radius: 8px;">Tancar</button>
-            </div>
-            <div id="chat-log">🤖 Pere, gaudeix del passeig!</div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Pregunta'm...">
-                <button class="btn-main" style="width:60px; margin:0; border-radius: 12px;" onclick="enviarXat()">✈️</button>
-            </div>
+    <div id="global-chatbot">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="color: var(--primary);">Assistent SitgesWalk</strong>
+            <button onclick="toggleChat()" style="border:none; background:#eee; padding: 5px 15px; border-radius: 8px;">Tancar</button>
+        </div>
+        <div id="chat-log">🤖 Hola Pere! Soc el teu guia. Què vols fer avui?</div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Escriu aquí...">
+            <button class="btn-main" style="width:60px; margin:0; border-radius: 10px;" onclick="enviarXat()">✈️</button>
         </div>
     </div>
 
     <script>
         let watchID = null;
 
-        setTimeout(() => { canviarPantalla('splash', 'ruta-select'); }, 2500);
+        // Mostrar botó xat després del splash
+        setTimeout(() => { 
+            canviarPantalla('splash', 'ruta-select');
+            document.getElementById('chat-toggle-btn').style.display = 'flex';
+        }, 2500);
 
         function canviarPantalla(act, seg) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(seg).classList.add('active');
         }
 
-        function comencarApp(t) {
+        function comencarApp(temps) {
             canviarPantalla('ruta-select', 'main');
             iniciarGPS();
-            parlar("Ruta de " + t + " iniciada. Som-hi!");
+            const msg = "Ruta de " + temps + " seleccionada. Segueix el mapa!";
+            afegirAlLog(msg, "🤖");
+            parlar(msg);
         }
 
         function finalitzarRuta() {
-            if (confirm("Pere, vols donar per acabada la ruta actual?")) {
-                if (watchID) navigator.geolocation.clearWatch(watchID);
-                parlar("Ruta finalitzada. Espero que t'hagi agradat el passeig per Sitges!");
-                canviarPantalla('main', 'ruta-select');
-                // Resetejar interfície
-                document.getElementById('current-street').innerText = "Detectant carrer...";
+            if (confirm("Vols aturar la ruta i tornar al menú principal?")) {
+                if (watchID !== null) {
+                    navigator.geolocation.clearWatch(watchID);
+                    watchID = null;
+                }
                 document.getElementById('map-fullscreen').src = "";
+                document.getElementById('current-street').innerText = "Detectant carrer...";
+                canviarPantalla('main', 'ruta-select');
+                parlar("Ruta finalitzada.");
             }
         }
 
@@ -141,30 +149,34 @@
                     const lat = p.coords.latitude;
                     const lon = p.coords.longitude;
                     document.getElementById('map-fullscreen').src = `https://maps.google.com/maps?q=${lat},${lon}&t=k&z=18&output=embed`;
-                    obtenirCarrer(lat, lon);
+                    obtenirNomCarrer(lat, lon);
                 }, null, { enableHighAccuracy: true });
             }
         }
 
-        async function obtenirCarrer(lat, lon) {
+        async function obtenirNomCarrer(lat, lon) {
             try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-                const data = await res.json();
-                document.getElementById('current-street').innerText = "📍 " + (data.address.road || "Sitges");
+                const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                const d = await r.json();
+                document.getElementById('current-street').innerText = "📍 " + (d.address.road || "Sitges");
             } catch (e) { }
         }
 
         function toggleChat() { document.getElementById('global-chatbot').classList.toggle('open'); }
 
+        function afegirAlLog(t, a) {
+            const l = document.getElementById('chat-log');
+            l.innerHTML += `<div><b>${a}:</b> ${t}</div>`;
+            l.scrollTop = l.scrollHeight;
+        }
+
         function enviarXat() {
             const i = document.getElementById('chat-input');
-            const l = document.getElementById('chat-log');
             if(i.value) {
-                l.innerHTML += `<div><b>Tu:</b> ${i.value}</div>`;
-                l.innerHTML += `<div><b>🤖:</b> Entès Pere! Continuem la ruta.</div>`;
-                parlar("Entès Pere!");
+                afegirAlLog(i.value, "Tu");
+                const r = "Entès Pere! Estic aquí per guiar-te.";
+                setTimeout(() => { afegirAlLog(r, "🤖"); parlar(r); }, 500);
                 i.value = "";
-                l.scrollTop = l.scrollHeight;
             }
         }
 
