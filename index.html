@@ -46,15 +46,23 @@
         .btn-outline { background: white; border: 2px solid #ddd; color: #444; font-size: 0.9rem; }
 
         .permisos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .status-box { background: #f8f9fa; padding: 12px; border-radius: 10px; font-size: 0.85rem; }
+        .status-box { background: #f8f9fa; padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 15px; }
         .status-item { display: flex; justify-content: space-between; margin-bottom: 5px; }
         .status-item span { font-weight: bold; color: #888; }
         .ok { color: var(--accent) !important; }
 
+        /* CHATBOT INTERFACE */
+        #chat-log { 
+            height: 120px; overflow-y: auto; background: #f1f1f1; 
+            border-radius: 10px; padding: 10px; font-size: 0.85rem; 
+            margin-bottom: 10px; border: 1px solid #ddd; text-align: left;
+        }
+        .chat-input-area { display: flex; gap: 5px; }
+        #chat-input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #ddd; }
+        .btn-icon { width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center; margin: 0; }
+
         /* PANTALLA PRINCIPAL */
-        .image-header { width: 100%; height: 150px; border-radius: 12px; background-size: cover; background-position: center; background-color: #eee; margin-bottom: 15px; }
-        #map-container { width: 100%; height: 180px; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; margin: 10px 0; }
-        .desc-box { background: #f9f9f9; padding: 15px; border-radius: 10px; border-left: 4px solid var(--primary); font-size: 0.9rem; max-height: 120px; overflow-y: auto; }
+        .image-header { width: 100%; height: 120px; border-radius: 12px; background-size: cover; background-position: center; background-color: #eee; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -62,7 +70,8 @@
     <div id="splash" class="screen active">
         <h1>SitgesWalk</h1>
         <p>by Pere Badia i Lorenz</p>
-        <div class="loader"></div> </div>
+        <div class="loader"></div>
+    </div>
 
     <div id="setup" class="screen">
         <div class="container">
@@ -78,25 +87,98 @@
                 <button class="btn btn-outline" onclick="demanarPermis('galeria')">🖼️ Galeria</button>
             </div>
 
-            <div class="card status-box">
+            <div class="status-box">
                 <div class="status-item" id="st-gps">Ubicació: <span>PENDENT</span></div>
                 <div class="status-item" id="st-camera">Càmera: <span>PENDENT</span></div>
                 <div class="status-item" id="st-micro">Micròfon: <span>PENDENT</span></div>
                 <div class="status-item" id="st-galeria">Galeria: <span>PENDENT</span></div>
             </div>
 
-            <button class="btn btn-main" onclick="anarARuta()" style="margin-top: 15px;">SEGÜENT ➔</button>
+            <button class="btn btn-main" onclick="anarARuta()">SEGÜENT ➔</button>
         </div>
     </div>
 
-    <script type="module">
-        // Lògica de canvi de pantalla amb els 3 segons que demanaves
+    <div id="ruta-select" class="screen">
+        <div class="container">
+            <div class="card">
+                <h2 style="text-align: center;">Tria la teva ruta</h2>
+                <button class="btn btn-outline" onclick="comencarApp('30min')">⏱️ Express (30 min)</button>
+                <button class="btn btn-main" onclick="comencarApp('completa')">⭐ Ruta Completa</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main" class="screen">
+        <div class="container">
+            <div class="card">
+                <div id="mon-imatge" class="image-header"></div>
+                <h3 id="mon-nom" style="margin: 0;">Monument de Sitges</h3>
+                <p id="mon-desc" style="font-size: 0.9rem; color: #555;">Explora la història de la vila.</p>
+
+                <div id="chat-section" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                    <div id="chat-log">🤖 Hola Pere! Soc el teu guia virtual. Pregunta'm el que vulguis sobre Sitges.</div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Escriu...">
+                        <button class="btn btn-main btn-icon" onclick="enviarMissatge()">✈️</button>
+                        <button class="btn btn-success btn-icon" onclick="activarVeu()">🎤</button>
+                    </div>
+                </div>
+
+                <button class="btn btn-outline" onclick="identificarGPS()" style="margin-top: 15px; font-size: 0.8rem;">📍 RE-LOCALITZAR GPS</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- NAVEGACIÓ ---
         setTimeout(() => {
             document.getElementById('splash').classList.remove('active');
             document.getElementById('setup').classList.add('active');
-        }, 3000); // 3000ms = 3 segons
+        }, 3000);
 
-        // Funcions de permisos
+        function anarARuta() {
+            // ELIMINAT L'ALERT que bloquejava el programa
+            document.getElementById('setup').classList.remove('active');
+            document.getElementById('ruta-select').classList.add('active');
+        }
+
+        function comencarApp(tipus) {
+            document.getElementById('ruta-select').classList.remove('active');
+            document.getElementById('main').classList.add('active');
+        }
+
+        // --- CHATBOT VEU I TEXT ---
+        function parlar(text) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'ca-ES';
+            window.speechSynthesis.speak(u);
+        }
+
+        function enviarMissatge() {
+            const input = document.getElementById('chat-input');
+            const log = document.getElementById('chat-log');
+            if (input.value.trim() !== "") {
+                log.innerHTML += `<div><b>Tu:</b> ${input.value}</div>`;
+                const resposta = "Perfecte! Estic buscant informació sobre " + input.value + " a Sitges...";
+                log.innerHTML += `<div><b>🤖:</b> ${resposta}</div>`;
+                parlar(resposta);
+                input.value = "";
+                log.scrollTop = log.scrollHeight;
+            }
+        }
+
+        function activarVeu() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'ca-ES';
+            recognition.onresult = (event) => {
+                document.getElementById('chat-input').value = event.results[0][0].transcript;
+                enviarMissatge();
+            };
+            recognition.start();
+        }
+
+        // --- PERMISOS ---
         window.demanarPermis = (tipus) => {
             if(tipus === 'gps') {
                 navigator.geolocation.getCurrentPosition(() => marcarOK('gps'));
@@ -112,11 +194,6 @@
 
         window.activarTot = () => {
             ['gps', 'camera', 'micro', 'galeria'].forEach(t => demanarPermis(t));
-        };
-
-        window.anarARuta = () => {
-            alert("Passant a la selecció de rutes...");
-            // Aquí aniria la teva lògica per mostrar 'ruta-select'
         };
     </script>
 </body>
