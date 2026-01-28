@@ -7,84 +7,72 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --primary: #007bff; /* Blau original del començament */
+            --primary: #0080ff; /* El blau de la teva imatge */
             --accent: #dc3545; 
-            --bg: #f0f2f5; 
-            --white: #ffffff; 
+            --bg: #f4f7f6; 
         }
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; position: fixed; }
 
+        /* PANTALLES */
         .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; position: relative; background: var(--bg); }
         .screen.active { display: flex; }
 
-        /* ANIMACIÓ LOADER SPLASH */
+        /* LOADER ANIMAT */
         .loader { 
-            border: 4px solid rgba(255,255,255,0.3); 
-            border-top: 4px solid white; 
-            border-radius: 50%; 
-            width: 40px; height: 40px; 
-            animation: spin 1s linear infinite; 
-            margin: 20px auto; 
+            border: 5px solid rgba(255,255,255,0.3); border-top: 5px solid white; 
+            border-radius: 50%; width: 50px; height: 50px; 
+            animation: spin 1s linear infinite; margin: 20px auto; 
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* SLIDER DE FOTOS */
-        .photo-slider { width: 100%; height: 220px; overflow: hidden; position: relative; background: #333; }
-        .photo-slider img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0; transition: opacity 1s; }
+        /* CARRUSEL DE FOTOS */
+        .photo-slider { width: 100%; height: 250px; overflow: hidden; position: relative; background: #000; border-bottom: 5px solid var(--primary); }
+        .photo-slider img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0; transition: opacity 1s ease; }
         .photo-slider img.visible { opacity: 1; }
 
-        /* CAPÇALERA */
+        /* HEADER */
         .header-info { 
-            background: var(--primary); color: white; 
-            padding: 10px 15px; text-align: center; z-index: 100; 
-            display: flex; justify-content: space-between; align-items: center; height: 75px; 
+            background: var(--primary); color: white; padding: 10px 15px; 
+            text-align: center; z-index: 100; display: flex; 
+            justify-content: space-between; align-items: center; height: 80px; 
         }
-        .header-text h1 { margin: 0; font-size: 1.2rem; }
-        .header-text p { margin: 0; font-size: 0.8rem; opacity: 0.9; }
+        .header-text h1 { margin: 0; font-size: 1.4rem; }
+        .header-text p { margin: 0; font-size: 0.85rem; }
 
-        /* BOTÓ FINALITZAR */
-        .btn-end { 
-            background: var(--accent); color: white; border: 2px solid white; 
-            padding: 8px 12px; border-radius: 8px; font-weight: 800; font-size: 0.7rem;
-        }
+        /* BOTONS */
+        .btn-end { background: var(--accent); color: white; border: 2px solid white; padding: 10px; border-radius: 10px; font-weight: 800; cursor: pointer; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 15px; width: 90%; font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; }
 
-        /* MAPA */
-        #map-fullscreen { flex: 1; width: 100%; height: 100%; border: none; }
-
-        /* CHATBOT PERSISTENT */
+        /* CHATBOT FLOTANT I GRAN */
         #chat-toggle-btn { 
-            position: fixed; bottom: 45px; right: 25px; width: 65px; height: 65px; 
+            position: fixed; bottom: 40px; right: 25px; width: 70px; height: 70px; 
             border-radius: 50%; background: var(--primary); color: white; 
-            border: 3px solid white; font-size: 1.8rem; z-index: 2000; 
-            display: none; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 3px solid white; font-size: 2rem; z-index: 2000; 
+            display: none; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         #global-chatbot { 
             position: fixed; bottom: 0; left: 0; right: 0; background: white; 
-            border-radius: 25px 25px 0 0; padding: 20px; z-index: 2100; 
-            transform: translateY(105%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            height: 340px; box-shadow: 0 -10px 30px rgba(0,0,0,0.2); 
+            border-radius: 30px 30px 0 0; padding: 25px; z-index: 2100; 
+            transform: translateY(105%); transition: transform 0.4s ease; 
+            height: 480px; /* FINESTRA BEN GRAN */
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.2); 
         }
         #global-chatbot.open { transform: translateY(0); }
 
-        /* BOTÓ TANCAR XAT: BLAU AMB LLETRES BLANQUES */
         .btn-close-chat { 
-            background: var(--primary); 
-            color: white; 
-            border: none; 
-            padding: 8px 18px; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background: var(--primary); color: white; border: none; 
+            padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer;
         }
 
-        #chat-log { height: 150px; overflow-y: auto; font-size: 0.9rem; background: #f8f9fa; padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #eee; }
-        .chat-input-area { display: flex; gap: 8px; }
-        #chat-input { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ddd; }
+        #chat-log { height: 260px; overflow-y: auto; background: #f9f9f9; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #eee; }
+        
+        .chat-input-area { display: flex; gap: 10px; }
+        .btn-icon { background: var(--primary); color: white; border: none; width: 55px; height: 55px; border-radius: 15px; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; }
+        #chat-input { flex: 1; padding: 15px; border-radius: 15px; border: 2px solid #eee; }
 
-        .btn-main { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 15px; width: 90%; font-weight: 700; margin-bottom: 10px; font-size: 1.1rem; }
+        #map-fullscreen { flex: 1; width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
@@ -92,7 +80,8 @@
     <div id="splash" class="screen active" style="justify-content:center; align-items:center; background: var(--primary); color:white;">
         <h1>SitgesWalk</h1>
         <p>by Pere Badia i Lorenz</p>
-        <div class="loader"></div> </div>
+        <div class="loader"></div>
+    </div>
 
     <div id="ruta-select" class="screen" style="align-items: center;">
         <div class="photo-slider" id="slider">
@@ -100,12 +89,11 @@
             <img src="sitges2.jpg">
             <img src="sitges3.jpg">
         </div>
-
-        <div style="text-align: center; padding: 20px; width: 100%;">
-            <h2 style="color: var(--primary); margin-top: 5px;">Hola Pere!</h2>
-            <p>Tria una ruta per començar:</p>
-            <button class="btn-main" onclick="comencarApp('30 minuts')">⏱️ 30 minuts</button>
-            <button class="btn-main" onclick="comencarApp('1 hora')">🚶 1 hora</button>
+        <div style="text-align: center; padding: 25px; width: 100%;">
+            <h2 style="color: var(--primary); font-size: 1.8rem;">Hola Pere!</h2>
+            <p>Tria una ruta per explorar Sitges:</p>
+            <button class="btn-main" onclick="comencarApp('30 minuts')">⏱️ Ruta 30 minuts</button>
+            <button class="btn-main" onclick="comencarApp('1 hora')">🚶 Ruta 1 hora</button>
             <button class="btn-main" onclick="comencarApp('Completa')">⭐ Ruta Completa</button>
         </div>
     </div>
@@ -125,14 +113,15 @@
     <button id="chat-toggle-btn" onclick="toggleChat()">🤖</button>
 
     <div id="global-chatbot">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <strong style="color: var(--primary);">Assistent SitgesWalk</strong>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <strong style="color: var(--primary); font-size: 1.2rem;">Guia Virtual</strong>
             <button class="btn-close-chat" onclick="toggleChat()">TANCAR</button>
         </div>
-        <div id="chat-log">🤖 Hola Pere! Soc el teu guia de Sitges.</div>
+        <div id="chat-log">🤖 Hola Pere! Sóc el teu assistent. Com puc ajudar-te?</div>
         <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Pregunta'm...">
-            <button class="btn-main" style="width:60px; margin:0; border-radius: 10px;" onclick="enviarXat()">✈️</button>
+            <button class="btn-icon" onclick="activarMicro()">🎤</button>
+            <input type="text" id="chat-input" placeholder="Escriu...">
+            <button class="btn-icon" onclick="enviarXat()">✈️</button>
         </div>
     </div>
 
@@ -140,35 +129,35 @@
         let watchID = null;
         let fotoIdx = 0;
 
-        // Slider Fotos
+        // Canvi automàtic de fotos
         setInterval(() => {
             const fs = document.querySelectorAll('#slider img');
-            fs[fotoIdx].classList.remove('visible');
-            fotoIdx = (fotoIdx + 1) % fs.length;
-            fs[fotoIdx].classList.add('visible');
+            if(fs.length > 0) {
+                fs[fotoIdx].classList.remove('visible');
+                fotoIdx = (fotoIdx + 1) % fs.length;
+                fs[fotoIdx].classList.add('visible');
+            }
         }, 3000);
 
-        // Pantalla inicial
+        // Pas de Splash a Menú
         setTimeout(() => { 
-            canviarPantalla('splash', 'ruta-select');
+            document.getElementById('splash').classList.remove('active');
+            document.getElementById('ruta-select').classList.add('active');
             document.getElementById('chat-toggle-btn').style.display = 'flex';
         }, 3000);
 
-        function canviarPantalla(act, seg) {
-            document.getElementById(act).classList.remove('active');
-            document.getElementById(seg).classList.add('active');
-        }
-
         function comencarApp(t) {
-            canviarPantalla('ruta-select', 'main');
+            document.getElementById('ruta-select').classList.remove('active');
+            document.getElementById('main').classList.add('active');
             iniciarGPS();
-            parlar("Iniciem la ruta de " + t);
+            parlar("Iniciant ruta de " + t);
         }
 
         function finalitzarRuta() {
-            if (confirm("Pere, vols aturar la ruta?")) {
+            if (confirm("Vols aturar la ruta?")) {
                 if (watchID) navigator.geolocation.clearWatch(watchID);
-                canviarPantalla('main', 'ruta-select');
+                document.getElementById('main').classList.remove('active');
+                document.getElementById('ruta-select').classList.add('active');
                 parlar("Ruta finalitzada.");
             }
         }
@@ -192,13 +181,27 @@
         }
 
         function toggleChat() { document.getElementById('global-chatbot').classList.toggle('open'); }
+
         function enviarXat() {
             const i = document.getElementById('chat-input');
+            const l = document.getElementById('chat-log');
             if(i.value) {
-                document.getElementById('chat-log').innerHTML += `<div><b>Tu:</b> ${i.value}</div>`;
+                l.innerHTML += `<div><b>Tu:</b> ${i.value}</div>`;
+                l.scrollTop = l.scrollHeight;
                 i.value = "";
             }
         }
+
+        function activarMicro() {
+            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            rec.lang = 'ca-ES';
+            rec.start();
+            rec.onresult = (e) => {
+                document.getElementById('chat-input').value = e.results[0][0].transcript;
+                enviarXat();
+            };
+        }
+
         function parlar(t) {
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(t); u.lang = 'ca-ES';
