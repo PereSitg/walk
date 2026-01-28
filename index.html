@@ -7,8 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --primary: #0080ff; /* El blau de la teva imatge */
+            --primary: #0080ff; 
             --accent: #dc3545; 
+            --success: #28a745;
             --bg: #f4f7f6; 
         }
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -24,6 +25,27 @@
             animation: spin 1s linear infinite; margin: 20px auto; 
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* MODAL DE TANCAMENT PROFESSIONAL */
+        #confirm-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--primary);
+            z-index: 5000;
+            display: none; /* Amagat per defecte */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .modal-title { color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; }
+        .modal-text { color: white; font-size: 1.2rem; margin-bottom: 40px; }
+        .modal-buttons { display: flex; gap: 20px; }
+        .btn-modal { 
+            padding: 15px 30px; border: none; border-radius: 12px; 
+            font-size: 1.1rem; font-weight: bold; cursor: pointer; min-width: 140px;
+        }
+        .btn-cancel { background-color: var(--success); color: white; }
+        .btn-confirm { background-color: var(--accent); color: white; }
 
         /* CARRUSEL DE FOTOS */
         .photo-slider { width: 100%; height: 250px; overflow: hidden; position: relative; background: #000; border-bottom: 5px solid var(--primary); }
@@ -60,14 +82,12 @@
         }
         #global-chatbot.open { transform: translateY(0); }
 
-        /* BOTÓ TANCAR BLAU I LLETRES BLANQUES */
         .btn-close-chat { 
             background: var(--primary); color: white; border: none; 
             padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer;
         }
 
         #chat-log { height: 260px; overflow-y: auto; background: #f9f9f9; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #eee; }
-        
         .chat-input-area { display: flex; gap: 10px; }
         .btn-icon { background: var(--primary); color: white; border: none; height: 55px; border-radius: 15px; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; padding: 0 15px; cursor: pointer; }
         #chat-input { flex: 1; padding: 15px; border-radius: 15px; border: 2px solid #eee; }
@@ -76,6 +96,15 @@
     </style>
 </head>
 <body>
+
+    <div id="confirm-modal">
+        <div class="modal-title">SitgesWalk</div>
+        <div class="modal-text">Vols deixar la ruta?</div>
+        <div class="modal-buttons">
+            <button class="btn-modal btn-cancel" onclick="tancarModal()">Cancel·lar</button>
+            <button class="btn-modal btn-confirm" onclick="confirmarFinalitzacio()">D'acord</button>
+        </div>
+    </div>
 
     <div id="splash" class="screen active" style="justify-content:center; align-items:center; background: var(--primary); color:white;">
         <h1>SitgesWalk</h1>
@@ -105,7 +134,7 @@
                 <h1>SitgesWalk</h1>
                 <p id="current-street">Detectant carrer...</p>
             </div>
-            <button class="btn-end" onclick="finalitzarRuta()">FINALITZAR</button>
+            <button class="btn-end" onclick="obrirModal()">FINALITZAR</button>
         </div>
         <iframe id="map-fullscreen" src=""></iframe>
     </div>
@@ -128,6 +157,19 @@
     <script>
         let watchID = null;
         let fotoIdx = 0;
+        let wakeLock = null;
+
+        // --- FUNCIÓ PANTALLA SEMPRE ENCESA ---
+        async function mantenirPantallaEncesa() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log("Pantalla bloquejada: No s'apagarà");
+                } catch (err) {
+                    console.error("Error WakeLock:", err);
+                }
+            }
+        }
 
         // Canvi automàtic de fotos
         setInterval(() => {
@@ -150,16 +192,27 @@
             document.getElementById('ruta-select').classList.remove('active');
             document.getElementById('main').classList.add('active');
             iniciarGPS();
+            mantenirPantallaEncesa(); // Activem que no s'apagui la pantalla
             parlar("Iniciant ruta de " + t);
         }
 
-        function finalitzarRuta() {
-            if (confirm("Vols aturar la ruta?")) {
-                if (watchID) navigator.geolocation.clearWatch(watchID);
-                document.getElementById('main').classList.remove('active');
-                document.getElementById('ruta-select').classList.add('active');
-                parlar("Ruta finalitzada.");
-            }
+        // --- LÒGICA DEL MODAL PERSONALITZAT ---
+        function obrirModal() {
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+
+        function tancarModal() {
+            document.getElementById('confirm-modal').style.display = 'none';
+        }
+
+        function confirmarFinalitzacio() {
+            if (watchID) navigator.geolocation.clearWatch(watchID);
+            if (wakeLock) wakeLock.release().then(() => wakeLock = null); // Alliberem la pantalla
+            
+            tancarModal();
+            document.getElementById('main').classList.remove('active');
+            document.getElementById('ruta-select').classList.add('active');
+            parlar("Ruta finalitzada.");
         }
 
         function iniciarGPS() {
