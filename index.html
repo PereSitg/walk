@@ -81,12 +81,12 @@
     <div id="main" class="screen">
         <div class="container">
             <div class="card">
-                <h3 id="mon-nom" style="margin:0">Església de Sant Bartomeu</h3>
+                <h3 id="mon-nom" style="margin:0">Calculant ruta...</h3>
                 <div id="map-container">
                     <iframe id="mini-mapa" width="100%" height="100%" frameborder="0" style="border:0"></iframe>
                 </div>
                 <p id="mon-desc" style="font-size: 0.9rem; border-left: 4px solid var(--primary); padding-left: 10px;">
-                    Benvingut a la Punta de Sitges. Aquesta església del segle XVII és la imatge més icònica de la vila.
+                    Esperant senyal de GPS per guiar-te.
                 </p>
                 <button class="btn btn-main" onclick="identificarPerGPS()">📍 RE-LOCALITZAR GPS</button>
             </div>
@@ -103,14 +103,29 @@
     </div>
 
     <script>
-        // --- MOTOR DEL CHATBOT (RESPOSTES REALS) ---
+        // --- DADES I LÒGICA DE DISTÀNCIA ---
+        const DESTI = { nom: "Església de Sant Bartomeu", lat: 41.2355, lon: 1.8123 };
+        let distanciaActual = null;
+
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
+            const R = 6371000; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        // --- MOTOR DEL CHATBOT ---
         function generarResposta(pregunta) {
             const p = pregunta.toLowerCase();
-            if (p.includes("hola")) return "Hola Pere! Estic a punt per guiar-te per Sitges. Què vols visitar?";
-            if (p.includes("església") || p.includes("punta")) return "L'església de Sant Bartomeu i Santa Tecla és del segle disset i té un estil barroc preciós.";
-            if (p.includes("ruta")) return "Estem fent la ruta per la façana marítima. Segueix el mapa!";
-            if (p.includes("qui ets")) return "Soc l'assistent virtual de SitgesWalk, creat per Pere Badia.";
-            return "No estic segur de l'explicació de '" + pregunta + "', però podem anar a la Punta a veure les vistes!";
+            if (p.includes("hola")) return "Hola Pere! Soc el teu guia. Estic calculant la millor ruta.";
+            if (p.includes("quant falta") || p.includes("distància")) {
+                return distanciaActual ? `Falten aproximadament ${Math.round(distanciaActual)} metres per arribar.` : "Encara no tinc la teva posició.";
+            }
+            if (p.includes("església")) return "L'església és del segle XVII, estil barroc. Està dalt d'un turó mirant al mar.";
+            return "Vols saber més sobre Sitges? Pregunta'm el que vulguis.";
         }
 
         // --- NAVEGACIÓ ---
@@ -128,10 +143,35 @@
 
         function comencarApp(temps) {
             canviarPantalla('ruta-select', 'main');
-            identificarPerGPS(); // Força l'inici del mapa
-            const msg = "Perfecte. Iniciem la ruta de " + temps + ". Segueix el punt blau al mapa.";
-            afegirAlLog(msg, "🤖");
-            parlar(msg);
+            identificarPerGPS();
+        }
+
+        // --- GPS I MAPA ---
+        function identificarPerGPS() {
+            navigator.geolocation.getCurrentPosition((p) => {
+                const lat = p.coords.latitude;
+                const lon = p.coords.longitude;
+                distanciaActual = calcularDistancia(lat, lon, DESTI.lat, DESTI.lon);
+                
+                // Actualitzem Mapa Híbrid
+                const url = `https://www.google.com/maps/embed/v1/view?key=YOUR_API_KEY_HERE&center=${lat},${lon}&zoom=18&maptype=satellite`; 
+                // Nota: Per evitar errors de clau, usem el format d'embed directe sense clau si és possible o el placeholder
+                document.getElementById('mini-mapa').src = `https://maps.google.com/maps?q=${lat},${lon}&t=k&z=18&output=embed`;
+
+                const titol = document.getElementById('mon-nom');
+                const desc = document.getElementById('mon-desc');
+
+                if (distanciaActual < 30) {
+                    titol.innerText = "📍 Arribat: " + DESTI.nom;
+                    desc.innerText = "Benvingut! Aquest monument del segle XVII és el cor de Sitges.";
+                    parlar("Ja hem arribat a l'església. Vols que t'expliqui la seva història?");
+                } else {
+                    titol.innerText = "🚶 En camí cap a: " + DESTI.nom;
+                    desc.innerText = `Ets a uns ${Math.round(distanciaActual)} metres. Continua caminant pel Passeig.`;
+                    parlar(`Anirem cap a l'església. Falten ${Math.round(distanciaActual)} metres.`);
+                }
+                marcarOK('gps');
+            });
         }
 
         // --- SISTEMA DE XAT ---
@@ -139,21 +179,15 @@
             const i = document.getElementById('chat-input');
             const text = i.value.trim();
             if(!text) return;
-
             afegirAlLog(text, "Tu");
-            const resposta = generarResposta(text);
-            
-            setTimeout(() => {
-                afegirAlLog(resposta, "🤖");
-                parlar(resposta);
-            }, 600)
-            
+            const r = generarResposta(text);
+            setTimeout(() => { afegirAlLog(r, "🤖"); parlar(r); }, 600);
             i.value = "";
         }
 
-        function afegirAlLog(text, autor) {
+        function afegirAlLog(t, a) {
             const l = document.getElementById('chat-log');
-            l.innerHTML += `<div><b>${autor}:</b> ${text}</div>`;
+            l.innerHTML += `<div><b>${a}:</b> ${t}</div>`;
             l.scrollTop = l.scrollHeight;
         }
 
@@ -161,54 +195,25 @@
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(t);
             u.lang = 'ca-ES';
-            u.rate = 1;
             window.speechSynthesis.speak(u);
         }
 
         function escoltarVeu() {
             const rec = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
             rec.lang = 'ca-ES';
-            rec.onresult = (e) => { 
-                document.getElementById('chat-input').value = e.results[0][0].transcript; 
-                enviarXat(); 
-            };
+            rec.onresult = (e) => { document.getElementById('chat-input').value = e.results[0][0].transcript; enviarXat(); };
             rec.start();
         }
 
-        // --- MAPA I GPS ---
-        function identificarPerGPS() {
-            navigator.geolocation.getCurrentPosition((p) => {
-                const lat = p.coords.latitude;
-                const lon = p.coords.longitude;
-                // Google Maps Híbrid (Satèl·lit + Etiquetes)
-                const url = `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1500!2d${lon}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sca!2ses!4v1700000000000!5m2!1sca!2ses&maptype=satellite`;
-                document.getElementById('mini-mapa').src = url;
-                marcarOK('gps');
-            }, (err) => {
-                console.log("Error GPS");
-            });
-        }
-
-        // --- PERMISOS ---
-        function demanarPermis(t) {
-            if(t === 'gps') identificarPerGPS();
-            else marcarOK(t);
-        }
-
-        function marcarOK(t) {
+        function demanarPermis(t) { t === 'gps' ? identificarPerGPS() : marcarOK(t); }
+        function marcarOK(t) { 
             const s = document.querySelector(`#st-${t} span`);
             if(s) { s.innerText = "ACTIU"; s.classList.add('ok'); }
         }
-
-        function activarTot() {
-            ['gps', 'camera', 'micro', 'galeria'].forEach(t => demanarPermis(t));
-        }
-
+        function activarTot() { ['gps', 'camera', 'micro', 'galeria'].forEach(t => demanarPermis(t)); }
         function revisarPermisos() {
             if (navigator.permissions) {
-                navigator.permissions.query({ name: 'geolocation' }).then(res => {
-                    if (res.state === 'granted') marcarOK('gps');
-                });
+                navigator.permissions.query({ name: 'geolocation' }).then(res => { if (res.state === 'granted') marcarOK('gps'); });
             }
         }
     </script>
