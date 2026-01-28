@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SitgesWalk Pro - Pere Badia i Lorenz</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
             --primary: #0080ff; 
+            --dark-blue: #0056b3;
             --accent: #dc3545; 
             --success: #28a745;
             --bg: #f4f7f6; 
@@ -18,11 +19,27 @@
         .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; position: relative; background: var(--bg); }
         .screen.active { display: flex; }
 
-        /* LOADER ANIMAT */
+        /* SPLASH SCREEN AMB LOGO */
+        #splash {
+            justify-content: center;
+            align-items: center;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+        }
+        .logo-container {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+        }
+        .splash-text h1 { margin: 0; font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; }
+        .splash-text p { margin: 5px 0 20px 0; font-size: 1rem; opacity: 0.9; }
+
+        /* LOADER */
         .loader { 
-            border: 5px solid rgba(255,255,255,0.3); border-top: 5px solid white; 
-            border-radius: 50%; width: 50px; height: 50px; 
-            animation: spin 1s linear infinite; margin: 20px auto; 
+            border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid white; 
+            border-radius: 50%; width: 40px; height: 40px; 
+            animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -31,7 +48,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--primary);
             z-index: 5000;
-            display: none; /* Amagat per defecte */
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -47,51 +64,16 @@
         .btn-cancel { background-color: var(--success); color: white; }
         .btn-confirm { background-color: var(--accent); color: white; }
 
-        /* CARRUSEL DE FOTOS */
+        /* LA RESTA D'ESTILS ES MANTENEN IGUAL */
         .photo-slider { width: 100%; height: 250px; overflow: hidden; position: relative; background: #000; border-bottom: 5px solid var(--primary); }
         .photo-slider img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0; transition: opacity 1s ease; }
         .photo-slider img.visible { opacity: 1; }
-
-        /* HEADER */
-        .header-info { 
-            background: var(--primary); color: white; padding: 10px 15px; 
-            text-align: center; z-index: 100; display: flex; 
-            justify-content: space-between; align-items: center; height: 80px; 
-        }
-        .header-text h1 { margin: 0; font-size: 1.4rem; }
-        .header-text p { margin: 0; font-size: 0.85rem; }
-
-        /* BOTONS */
+        .header-info { background: var(--primary); color: white; padding: 10px 15px; text-align: center; z-index: 100; display: flex; justify-content: space-between; align-items: center; height: 80px; }
         .btn-end { background: var(--accent); color: white; border: 2px solid white; padding: 10px; border-radius: 10px; font-weight: 800; cursor: pointer; }
         .btn-main { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 15px; width: 90%; font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; }
-
-        /* CHATBOT */
-        #chat-toggle-btn { 
-            position: fixed; bottom: 40px; right: 25px; width: 70px; height: 70px; 
-            border-radius: 50%; background: var(--primary); color: white; 
-            border: 3px solid white; font-size: 2rem; z-index: 2000; 
-            display: none; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        #global-chatbot { 
-            position: fixed; bottom: 0; left: 0; right: 0; background: white; 
-            border-radius: 30px 30px 0 0; padding: 25px; z-index: 2100; 
-            transform: translateY(105%); transition: transform 0.4s ease; 
-            height: 480px; 
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.2); 
-        }
+        #chat-toggle-btn { position: fixed; bottom: 40px; right: 25px; width: 70px; height: 70px; border-radius: 50%; background: var(--primary); color: white; border: 3px solid white; font-size: 2rem; z-index: 2000; display: none; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        #global-chatbot { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: 30px 30px 0 0; padding: 25px; z-index: 2100; transform: translateY(105%); transition: transform 0.4s ease; height: 480px; box-shadow: 0 -10px 30px rgba(0,0,0,0.2); }
         #global-chatbot.open { transform: translateY(0); }
-
-        .btn-close-chat { 
-            background: var(--primary); color: white; border: none; 
-            padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer;
-        }
-
-        #chat-log { height: 260px; overflow-y: auto; background: #f9f9f9; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #eee; }
-        .chat-input-area { display: flex; gap: 10px; }
-        .btn-icon { background: var(--primary); color: white; border: none; height: 55px; border-radius: 15px; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; padding: 0 15px; cursor: pointer; }
-        #chat-input { flex: 1; padding: 15px; border-radius: 15px; border: 2px solid #eee; }
-
         #map-fullscreen { flex: 1; width: 100%; height: 100%; border: none; }
     </style>
 </head>
@@ -106,9 +88,19 @@
         </div>
     </div>
 
-    <div id="splash" class="screen active" style="justify-content:center; align-items:center; background: var(--primary); color:white;">
-        <h1>SitgesWalk</h1>
-        <p>by Pere Badia i Lorenz</p>
+    <div id="splash" class="screen active">
+        <div class="logo-container">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 5 C32 5 18 19 18 37 C18 58 50 90 50 90 C50 90 82 58 82 37 C82 19 68 5 50 5Z" fill="#004a99"/>
+                <circle cx="50" cy="35" r="22" fill="white"/>
+                <path d="M50 22 C51.6 22 53 20.6 53 19 C53 17.4 51.6 16 50 16 C48.4 16 47 17.4 47 19 C47 20.6 48.4 22 50 22 Z M54 35 L57 45 M46 35 L43 45 M50 24 L50 35 M48 35 L52 35 M47 48 L50 38 L53 48" stroke="#004a99" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M50 25 L50 35 L54 44 M50 35 L46 44 M48 28 L53 30" stroke="#004a99" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="splash-text">
+            <h1>SitgesWalk</h1>
+            <p>by Pere Badia i Lorenz</p>
+        </div>
         <div class="loader"></div>
     </div>
 
@@ -144,34 +136,29 @@
     <div id="global-chatbot">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <strong style="color: var(--primary); font-size: 1.2rem;">Guia Virtual</strong>
-            <button class="btn-close-chat" onclick="toggleChat()">TANCAR</button>
+            <button style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold;" onclick="toggleChat()">TANCAR</button>
         </div>
-        <div id="chat-log">🤖 Hola Pere! Sóc el teu assistent. Com puc ajudar-te?</div>
-        <div class="chat-input-area">
+        <div id="chat-log" style="height: 260px; overflow-y: auto; background: #f9f9f9; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #eee;">🤖 Hola Pere! Sóc el teu assistent. Com puc ajudar-te?</div>
+        <div style="display: flex; gap: 10px;">
             <button class="btn-icon" onclick="activarMicro()">🎤</button>
-            <input type="text" id="chat-input" placeholder="Escriu...">
+            <input type="text" id="chat-input" placeholder="Escriu..." style="flex: 1; padding: 15px; border-radius: 15px; border: 2px solid #eee;">
             <button class="btn-icon" style="font-size: 0.8rem; font-weight: bold;" onclick="enviarXat()">ENVIAR</button>
         </div>
     </div>
 
     <script>
         let watchID = null;
-        let fotoIdx = 0;
         let wakeLock = null;
+        let fotoIdx = 0;
 
-        // --- FUNCIÓ PANTALLA SEMPRE ENCESA ---
+        // Mantenir pantalla encesa
         async function mantenirPantallaEncesa() {
             if ('wakeLock' in navigator) {
-                try {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    console.log("Pantalla bloquejada: No s'apagarà");
-                } catch (err) {
-                    console.error("Error WakeLock:", err);
-                }
+                try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
             }
         }
 
-        // Canvi automàtic de fotos
+        // Carrusel
         setInterval(() => {
             const fs = document.querySelectorAll('#slider img');
             if(fs.length > 0) {
@@ -181,7 +168,7 @@
             }
         }, 3000);
 
-        // Pas de Splash a Menú
+        // Splash to Menu
         setTimeout(() => { 
             document.getElementById('splash').classList.remove('active');
             document.getElementById('ruta-select').classList.add('active');
@@ -191,24 +178,17 @@
         function comencarApp(t) {
             document.getElementById('ruta-select').classList.remove('active');
             document.getElementById('main').classList.add('active');
+            mantenirPantallaEncesa();
             iniciarGPS();
-            mantenirPantallaEncesa(); // Activem que no s'apagui la pantalla
             parlar("Iniciant ruta de " + t);
         }
 
-        // --- LÒGICA DEL MODAL PERSONALITZAT ---
-        function obrirModal() {
-            document.getElementById('confirm-modal').style.display = 'flex';
-        }
-
-        function tancarModal() {
-            document.getElementById('confirm-modal').style.display = 'none';
-        }
-
+        // MODAL LOGIC
+        function obrirModal() { document.getElementById('confirm-modal').style.display = 'flex'; }
+        function tancarModal() { document.getElementById('confirm-modal').style.display = 'none'; }
         function confirmarFinalitzacio() {
             if (watchID) navigator.geolocation.clearWatch(watchID);
-            if (wakeLock) wakeLock.release().then(() => wakeLock = null); // Alliberem la pantalla
-            
+            if (wakeLock) wakeLock.release();
             tancarModal();
             document.getElementById('main').classList.remove('active');
             document.getElementById('ruta-select').classList.add('active');
@@ -219,7 +199,7 @@
             if (navigator.geolocation) {
                 watchID = navigator.geolocation.watchPosition((p) => {
                     const lat = p.coords.latitude; const lon = p.coords.longitude;
-                    document.getElementById('map-fullscreen').src = `https://maps.google.com/maps?q=${lat},${lon}&t=k&z=18&output=embed`;
+                    document.getElementById('map-fullscreen').src = `https://maps.google.com/maps?q=${lat},${lon}&t=k&z=18&ie=UTF8&iwloc=&output=embed`;
                     obtenirCarrer(lat, lon);
                 }, null, { enableHighAccuracy: true });
             }
@@ -234,7 +214,6 @@
         }
 
         function toggleChat() { document.getElementById('global-chatbot').classList.toggle('open'); }
-
         function enviarXat() {
             const i = document.getElementById('chat-input');
             const l = document.getElementById('chat-log');
@@ -245,21 +224,15 @@
                 parlar("Entès Pere!");
             }
         }
-
-        function activarMicro() {
-            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            rec.lang = 'ca-ES';
-            rec.start();
-            rec.onresult = (e) => {
-                document.getElementById('chat-input').value = e.results[0][0].transcript;
-                enviarXat();
-            };
-        }
-
         function parlar(t) {
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(t); u.lang = 'ca-ES';
             window.speechSynthesis.speak(u);
+        }
+        function activarMicro() {
+            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            rec.lang = 'ca-ES'; rec.start();
+            rec.onresult = (e) => { document.getElementById('chat-input').value = e.results[0][0].transcript; enviarXat(); };
         }
     </script>
 </body>
