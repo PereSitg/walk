@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SitgesWalk Pro - Pere Badia i Lorenz</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #0056b3; --accent: #28a745; --bg: #f0f2f5; --card: #ffffff; --radius: 18px; }
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -13,12 +13,10 @@
         .screen { display: none; min-height: 100vh; padding: 20px; flex-direction: column; align-items: center; }
         .screen.active { display: flex; }
 
-        /* SPLASH */
         #splash { background: linear-gradient(135deg, #0056b3, #007bff); color: white; justify-content: center; text-align: center; }
         .loader { border: 4px solid rgba(255,255,255,0.2); border-top: 4px solid white; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* TARGETES I BOTONS */
         .container { width: 100%; max-width: 400px; }
         .card { background: var(--card); border-radius: var(--radius); padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; margin-bottom: 15px; }
         .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
@@ -26,19 +24,17 @@
         .btn-success { background: var(--accent); color: white; }
         .btn-outline { background: white; border: 2px solid #ddd; }
 
-        /* CHATBOT PERMANENT */
         #global-chatbot {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: white; border-top: 2px solid var(--primary);
             padding: 10px; z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
             display: none;
         }
-        #chat-log { height: 70px; overflow-y: auto; font-size: 0.8rem; background: #f8f9fa; padding: 8px; border-radius: 8px; margin-bottom: 8px; }
+        #chat-log { height: 80px; overflow-y: auto; font-size: 0.85rem; background: #f8f9fa; padding: 8px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #eee; }
         .chat-input-area { display: flex; gap: 5px; }
-        #chat-input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
+        #chat-input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; }
 
-        /* MAPA HÍBRID */
-        #map-container { width: 100%; height: 200px; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; margin: 10px 0; }
+        #map-container { width: 100%; height: 220px; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; margin: 10px 0; background: #eee; }
         .ok { color: var(--accent) !important; font-weight: bold; }
     </style>
 </head>
@@ -52,7 +48,7 @@
 
     <div id="setup" class="screen">
         <div class="container">
-            <h2 style="text-align:center">Configuració Pro</h2>
+            <h2 style="text-align:center">Configuració</h2>
             <button class="btn btn-success" onclick="activarTot()">✅ ACTIVAR TOT DE COP</button>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
                 <button class="btn btn-outline" onclick="demanarPermis('gps')">🌍 GPS</button>
@@ -74,9 +70,9 @@
         <div class="container">
             <h2>Quina ruta vols fer?</h2>
             <div class="card">
-                <button class="btn btn-outline" onclick="comencarApp('30min')">⏱️ 30 minuts (Ràpida)</button>
-                <button class="btn btn-outline" onclick="comencarApp('1h')">🚶 1 hora (Estàndard)</button>
-                <button class="btn btn-outline" onclick="comencarApp('2h')">👟 2 hores (Extensa)</button>
+                <button class="btn btn-outline" onclick="comencarApp('30min')">⏱️ 30 minuts</button>
+                <button class="btn btn-outline" onclick="comencarApp('1h')">🚶 1 hora</button>
+                <button class="btn btn-outline" onclick="comencarApp('2h')">👟 2 hores</button>
                 <button class="btn btn-main" onclick="comencarApp('completa')">⭐ Ruta Completa</button>
             </div>
         </div>
@@ -85,41 +81,36 @@
     <div id="main" class="screen">
         <div class="container">
             <div class="card">
-                <h3 id="mon-nom" style="margin:0">Busca un monument</h3>
+                <h3 id="mon-nom" style="margin:0">Església de Sant Bartomeu</h3>
                 <div id="map-container">
                     <iframe id="mini-mapa" width="100%" height="100%" frameborder="0" style="border:0"></iframe>
                 </div>
                 <p id="mon-desc" style="font-size: 0.9rem; border-left: 4px solid var(--primary); padding-left: 10px;">
-                    Prem el botó GPS per detectar on ets.
+                    Benvingut a la Punta de Sitges. Aquesta església del segle XVII és la imatge més icònica de la vila.
                 </p>
-                <button class="btn btn-main" onclick="identificarPerGPS()">📍 RE-LOCALITZAR PER GPS</button>
+                <button class="btn btn-main" onclick="identificarPerGPS()">📍 RE-LOCALITZAR GPS</button>
             </div>
         </div>
     </div>
 
     <div id="global-chatbot">
-        <div id="chat-log">🤖 Hola Pere! Soc el teu guia. Digues "Hola" per començar.</div>
+        <div id="chat-log">🤖 Hola Pere! Soc el teu guia. Digues "Hola" o demana'm informació.</div>
         <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Pregunta'm...">
+            <input type="text" id="chat-input" placeholder="Escriu aquí...">
             <button class="btn btn-main" style="width:50px; margin:0" onclick="enviarXat()">✈️</button>
             <button class="btn btn-success" style="width:50px; margin:0" onclick="escoltarVeu()">🎤</button>
         </div>
     </div>
 
     <script>
-        // --- REVISIÓ AUTOMÀTICA DE GPS EN ENTRAR ---
-        function revisarGPSAutomaticament() {
-            if (navigator.permissions) {
-                navigator.permissions.query({ name: 'geolocation' }).then(function(result) {
-                    if (result.state === 'granted') {
-                        marcarOK('gps');
-                        identificarPerGPS(); // Carrega el mapa directament
-                    }
-                    result.onchange = function() {
-                        if (result.state === 'granted') { marcarOK('gps'); identificarPerGPS(); }
-                    };
-                });
-            }
+        // --- MOTOR DEL CHATBOT (RESPOSTES REALS) ---
+        function generarResposta(pregunta) {
+            const p = pregunta.toLowerCase();
+            if (p.includes("hola")) return "Hola Pere! Estic a punt per guiar-te per Sitges. Què vols visitar?";
+            if (p.includes("església") || p.includes("punta")) return "L'església de Sant Bartomeu i Santa Tecla és del segle disset i té un estil barroc preciós.";
+            if (p.includes("ruta")) return "Estem fent la ruta per la façana marítima. Segueix el mapa!";
+            if (p.includes("qui ets")) return "Soc l'assistent virtual de SitgesWalk, creat per Pere Badia.";
+            return "No estic segur de l'explicació de '" + pregunta + "', però podem anar a la Punta a veure les vistes!";
         }
 
         // --- NAVEGACIÓ ---
@@ -127,75 +118,98 @@
             document.getElementById('splash').classList.remove('active');
             document.getElementById('setup').classList.add('active');
             document.getElementById('global-chatbot').style.display = 'block';
-            revisarGPSAutomaticament(); // Revisa si el GPS ja estava actiu
+            revisarPermisos();
         }, 3000);
 
-        function canviarPantalla(actual, següent) {
+        function canviarPantalla(actual, seguent) {
             document.getElementById(actual).classList.remove('active');
-            document.getElementById(següent).classList.add('active');
+            document.getElementById(seguent).classList.add('active');
         }
 
         function comencarApp(temps) {
             canviarPantalla('ruta-select', 'main');
-            document.getElementById('chat-log').innerHTML += `<div>🤖 Ruta: ${temps}. Comencem!</div>`;
+            identificarPerGPS(); // Força l'inici del mapa
+            const msg = "Perfecte. Iniciem la ruta de " + temps + ". Segueix el punt blau al mapa.";
+            afegirAlLog(msg, "🤖");
+            parlar(msg);
         }
 
-        // --- MAPA HÍBRID ---
-        function actualitzarMapa(lat, lon) {
-            // Capa 'y' de Google Maps és l'HÍBRIDA (Satèl·lit + Etiquetes)
-            const url = `https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}`; // Placeholder conceptual
-            // Per a l'iframe usarem la versió d'incrustació híbrida:
-            const embedUrl = `https://maps.google.com/maps?q=${lat},${lon}&t=h&z=18&output=embed`;
-            document.getElementById('mini-mapa').src = embedUrl;
+        // --- SISTEMA DE XAT ---
+        function enviarXat() {
+            const i = document.getElementById('chat-input');
+            const text = i.value.trim();
+            if(!text) return;
+
+            afegirAlLog(text, "Tu");
+            const resposta = generarResposta(text);
+            
+            setTimeout(() => {
+                afegirAlLog(resposta, "🤖");
+                parlar(resposta);
+            }, 600)
+            
+            i.value = "";
         }
 
-        // --- CHATBOT ---
+        function afegirAlLog(text, autor) {
+            const l = document.getElementById('chat-log');
+            l.innerHTML += `<div><b>${autor}:</b> ${text}</div>`;
+            l.scrollTop = l.scrollHeight;
+        }
+
         function parlar(t) {
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(t);
             u.lang = 'ca-ES';
+            u.rate = 1;
             window.speechSynthesis.speak(u);
         }
 
-        function enviarXat() {
-            const i = document.getElementById('chat-input');
-            const l = document.getElementById('chat-log');
-            if(i.value) {
-                l.innerHTML += `<div><b>Tu:</b> ${i.value}</div>`;
-                const r = "D'acord Pere, busco dades sobre " + i.value;
-                l.innerHTML += `<div><b>🤖:</b> ${r}</div>`;
-                parlar(r);
-                i.value = "";
-                l.scrollTop = l.scrollHeight;
-            }
+        function escoltarVeu() {
+            const rec = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
+            rec.lang = 'ca-ES';
+            rec.onresult = (e) => { 
+                document.getElementById('chat-input').value = e.results[0][0].transcript; 
+                enviarXat(); 
+            };
+            rec.start();
         }
 
-        function escoltarVeu() {
-            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            rec.lang = 'ca-ES';
-            rec.onresult = (e) => { document.getElementById('chat-input').value = e.results[0][0].transcript; enviarXat(); };
-            rec.start();
+        // --- MAPA I GPS ---
+        function identificarPerGPS() {
+            navigator.geolocation.getCurrentPosition((p) => {
+                const lat = p.coords.latitude;
+                const lon = p.coords.longitude;
+                // Google Maps Híbrid (Satèl·lit + Etiquetes)
+                const url = `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1500!2d${lon}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sca!2ses!4v1700000000000!5m2!1sca!2ses&maptype=satellite`;
+                document.getElementById('mini-mapa').src = url;
+                marcarOK('gps');
+            }, (err) => {
+                console.log("Error GPS");
+            });
         }
 
         // --- PERMISOS ---
         function demanarPermis(t) {
-            if(t === 'gps') {
-                navigator.geolocation.getCurrentPosition((p) => {
-                    marcarOK('gps');
-                    actualitzarMapa(p.coords.latitude, p.coords.longitude);
-                }, (err) => console.log("GPS denegat"));
-            } else { marcarOK(t); }
-        }
-        
-        function marcarOK(t) { 
-            const s = document.querySelector(`#st-${t} span`);
-            if(s) { s.innerText = "ACTIU"; s.className = "ok"; }
+            if(t === 'gps') identificarPerGPS();
+            else marcarOK(t);
         }
 
-        function activarTot() { ['gps', 'camera', 'micro', 'galeria'].forEach(t => demanarPermis(t)); }
-        
-        function identificarPerGPS() {
-            navigator.geolocation.getCurrentPosition((p) => actualitzarMapa(p.coords.latitude, p.coords.longitude));
+        function marcarOK(t) {
+            const s = document.querySelector(`#st-${t} span`);
+            if(s) { s.innerText = "ACTIU"; s.classList.add('ok'); }
+        }
+
+        function activarTot() {
+            ['gps', 'camera', 'micro', 'galeria'].forEach(t => demanarPermis(t));
+        }
+
+        function revisarPermisos() {
+            if (navigator.permissions) {
+                navigator.permissions.query({ name: 'geolocation' }).then(res => {
+                    if (res.state === 'granted') marcarOK('gps');
+                });
+            }
         }
     </script>
 </body>
